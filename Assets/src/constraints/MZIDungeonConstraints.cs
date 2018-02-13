@@ -1,52 +1,45 @@
-package net.bytten.metazelda.constraints;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Pair;
-import net.bytten.metazelda.IDungeon;
-import net.bytten.metazelda.Symbol;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Implementing classes may specify constraints to be placed on Dungeon
  * generation.
  * 
- * @see net.bytten.metazelda.generators.IDungeonGenerator
+ * @see net.bytten.metazelda.generators.IMZDungeonGenerator
  */
-public interface IDungeonConstraints {
+public interface MZIDungeonConstraints {
 
     /**
      * @return  the maximum number of Rooms an 
-     * {@link net.bytten.metazelda.generators.IDungeonGenerator} may
-     *          place in an {@link net.bytten.metazelda.IDungeon}
+     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
+     *          place in an {@link net.bytten.metazelda.MZIDungeon}
      */
     public int getMaxRooms();
     
     /**
      * @return  the maximum number of keys an 
-     * {@link net.bytten.metazelda.generators.IDungeonGenerator} may
-     *          place in an {@link net.bytten.metazelda.IDungeon}
+     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
+     *          place in an {@link net.bytten.metazelda.MZIDungeon}
      */
     public int getMaxKeys();
 
     /**
      * Gets the number of switches the
-     * {@link net.bytten.metazelda.generators.IDungeonGenerator} is allowed to
-     * place in an {@link net.bytten.metazelda.IDungeon}.
+     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} is allowed to
+     * place in an {@link net.bytten.metazelda.MZIDungeon}.
      * Note only one switch is ever placed due to limitations of the current
      * algorithm.
      * 
      * @return  the maximum number of switches an
-     * {@link net.bytten.metazelda.generators.IDungeonGenerator} may
-     *          place in an {@link net.bytten.metazelda.IDungeon}
+     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
+     *          place in an {@link net.bytten.metazelda.MZIDungeon}
      */
     public int getMaxSwitches();
     
     /**
      * Gets the collection of ids from which an
-     * {@link net.bytten.metazelda.generators.IDungeonGenerator} is allowed to
+     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} is allowed to
      * pick the entrance room.
      * 
      * @return the collection of ids
@@ -73,11 +66,11 @@ public interface IDungeonConstraints {
     /**
      * Runs post-generation checks to determine the suitability of the dungeon.
      * 
-     * @param dungeon   the {@link net.bytten.metazelda.IDungeon} to check
+     * @param dungeon   the {@link net.bytten.metazelda.MZIDungeon} to check
      * @return  true to keep the dungeon, or false to discard the dungeon and
      *          attempt generation again
      */
-    public boolean isAcceptable(IDungeon dungeon);
+    public boolean isAcceptable(MZIDungeon dungeon);
     
     public boolean roomCanFitItem(int id, Symbol key);
     

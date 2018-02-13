@@ -1,4 +1,6 @@
-package net.bytten.metazelda;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Links two {@link Room}s.

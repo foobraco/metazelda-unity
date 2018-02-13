@@ -1,22 +1,8 @@
-package net.bytten.metazelda.constraints;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Vec2ISet;
-import net.bytten.gameutil.Direction;
-import net.bytten.gameutil.Pair;
-import net.bytten.metazelda.IDungeon;
-import net.bytten.metazelda.Symbol;
-import net.bytten.metazelda.util.GenerationFailureException;
-import net.bytten.metazelda.util.IntMap;
-
-public class FreeformConstraints implements IDungeonConstraints {
+public class FreeformConstraints implements MZIDungeonConstraints {
     
     public static final int DEFAULT_MAX_KEYS = 8;
     
@@ -33,12 +19,12 @@ public class FreeformConstraints implements IDungeonConstraints {
     }
     
     protected ColorMap colorMap;
-    protected IntMap<Group> groups;
+    protected MZIntMap<Group> groups;
     protected int maxKeys;
 
     public FreeformConstraints(ColorMap colorMap) {
         this.colorMap = colorMap;
-        this.groups = new IntMap<Group>();
+        this.groups = new MZIntMap<Group>();
         this.maxKeys = DEFAULT_MAX_KEYS;
         
         analyzeMap();
@@ -109,7 +95,7 @@ public class FreeformConstraints implements IDungeonConstraints {
     protected void checkConnected() {
         if (!isConnected()) {
             // Parts of the map are unreachable!
-            throw new GenerationFailureException("ColorMap is not fully connected");
+            throw new MZGenerationFailureException("ColorMap is not fully connected");
         }
     }
     
@@ -167,7 +153,7 @@ public class FreeformConstraints implements IDungeonConstraints {
     }
 
     @Override
-    public boolean isAcceptable(IDungeon dungeon) {
+    public boolean isAcceptable(MZIDungeon dungeon) {
         return true;
     }
 

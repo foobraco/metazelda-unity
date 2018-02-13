@@ -1,16 +1,10 @@
-package net.bytten.metazelda.constraints;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Vec2ISet;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Controls which spaces are valid for an
- * {@link net.bytten.metazelda.generators.IDungeonGenerator} to create
+ * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} to create
  * {@link Room}s in.
  * <p>
  * Essentially just a Set<{@link Vec2I}> with some convenience methods.

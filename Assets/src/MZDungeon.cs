@@ -1,25 +1,21 @@
-package net.bytten.metazelda;
-
-import java.util.Collection;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Rect2I;
-import net.bytten.metazelda.util.IntMap;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
- * @see IDungeon
+ * @see MZIDungeon
  * 
- * Due to the fact it uses IntMap to store the rooms, it makes the assumption
+ * Due to the fact it uses MZIntMap to store the rooms, it makes the assumption
  * that room ids are low in value, tight in range, and all positive.
  */
-public class Dungeon implements IDungeon {
+public class Dungeon implements MZIDungeon {
 
     protected int itemCount;
-    protected IntMap<Room> rooms;
+    protected MZIntMap<Room> rooms;
     protected Rect2I bounds;
     
     public Dungeon() {
-        rooms = new IntMap<Room>();
+        rooms = new MZIntMap<Room>();
         bounds = Rect2I.fromExtremes(Integer.MAX_VALUE,Integer.MAX_VALUE,
                 Integer.MIN_VALUE,Integer.MIN_VALUE);
     }

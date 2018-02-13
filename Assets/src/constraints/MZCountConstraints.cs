@@ -1,33 +1,20 @@
-package net.bytten.metazelda.constraints;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import net.bytten.gameutil.Direction;
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Vec2ISet;
-import net.bytten.gameutil.Vec2IMap;
-import net.bytten.gameutil.Pair;
-import net.bytten.metazelda.IDungeon;
-import net.bytten.metazelda.Symbol;
-import net.bytten.metazelda.util.IntMap;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
- * Limits the {@link net.bytten.metazelda.generators.IDungeonGenerator} in
+ * Limits the {@link net.bytten.metazelda.generators.IMZDungeonGenerator} in
  * the <i>number</i> of keys, switches and rooms it is allowed to place.
  *
  * Also restrict to a grid of 1x1 rooms.
  *
- * @see IDungeonConstraints
+ * @see MZIDungeonConstraints
  */
-public class CountConstraints implements IDungeonConstraints {
+public class CountConstraints implements MZIDungeonConstraints {
 
     protected int maxSpaces, maxKeys, maxSwitches;
     
-    protected IntMap<Vec2I> gridCoords;
+    protected MZIntMap<Vec2I> gridCoords;
     protected Vec2IMap<Integer> roomIds;
     protected int firstRoomId;
     
@@ -36,7 +23,7 @@ public class CountConstraints implements IDungeonConstraints {
         this.maxKeys = maxKeys;
         this.maxSwitches = maxSwitches;
 
-        gridCoords = new IntMap<Vec2I>();
+        gridCoords = new MZIntMap<Vec2I>();
         roomIds = new Vec2IMap<Integer>();
         Vec2I first = new Vec2I(0,0);
         firstRoomId = getRoomId(first);
@@ -83,7 +70,7 @@ public class CountConstraints implements IDungeonConstraints {
     }
     
     @Override
-    public boolean isAcceptable(IDungeon dungeon) {
+    public boolean isAcceptable(MZIDungeon dungeon) {
         return true;
     }
 

@@ -1,10 +1,6 @@
-package net.bytten.metazelda.constraints;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import net.bytten.gameutil.Vec2I;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Constrains the coordinates where Rooms may be placed to be only those within

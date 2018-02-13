@@ -1,14 +1,12 @@
-package net.bytten.metazelda;
-
-import java.util.Collection;
-
-import net.bytten.gameutil.Rect2I;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Represents the spacial layout of a lock-and-key puzzle and contains all
  * {@link Symbol}s, {@link Room}s and {@link Edge}s within the puzzle.
  */
-public interface IDungeon {
+public interface MZIDungeon {
 
     /**
      * @return  the rooms within the dungeon

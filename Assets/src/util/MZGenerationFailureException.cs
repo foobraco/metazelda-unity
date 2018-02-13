@@ -1,14 +1,13 @@
-package net.bytten.metazelda.util;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-public class GenerationFailureException extends RuntimeException {
-    private static final long serialVersionUID = 1L;
-
-    public GenerationFailureException(String message) {
-        super(message);
+public class MZGenerationFailureException : Exception {
+    public MZGenerationFailureException(string message) : base(message) {
     }
 
-    public GenerationFailureException(String message, Throwable cause) {
-        super(message, cause);
+    public MZGenerationFailureException(string message, Exception cause) : base(message) {
     }
 
 }

@@ -1,19 +1,6 @@
-package net.bytten.metazelda.generators;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.algorithms.AStar;
-import net.bytten.metazelda.Dungeon;
-import net.bytten.metazelda.Edge;
-import net.bytten.metazelda.Room;
-import net.bytten.metazelda.Symbol;
-import net.bytten.metazelda.constraints.IDungeonConstraints;
-import net.bytten.gameutil.logging.ILogger;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Extends DungeonGenerator to choose the least nonlinear one immediately
@@ -26,11 +13,11 @@ public class LinearDungeonGenerator extends DungeonGenerator {
     public static final int MAX_ATTEMPTS = 10;
 
     public LinearDungeonGenerator(ILogger logger, long seed,
-            IDungeonConstraints constraints) {
+            MZIDungeonConstraints constraints) {
         super(logger, seed, constraints);
     }
     
-    public LinearDungeonGenerator(long seed, IDungeonConstraints constraints) {
+    public LinearDungeonGenerator(long seed, MZIDungeonConstraints constraints) {
         this(null, seed, constraints);
     }
     
@@ -117,12 +104,12 @@ public class LinearDungeonGenerator extends DungeonGenerator {
     }
 
     @Override
-    public void generate() {
+    public void Generate() {
         int attempts = 0, currentNonlinearity = Integer.MAX_VALUE;
         int bestAttempt = 0;
         Dungeon currentBest = null;
         while (attempts++ < MAX_ATTEMPTS) {
-            super.generate();
+            super.Generate();
             
             int nonlinearity = measureNonlinearity();
             log("Dungeon " + attempts + " nonlinearity: "+

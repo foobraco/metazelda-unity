@@ -1,50 +1,31 @@
-package net.bytten.metazelda.generators;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Pair;
-import net.bytten.gameutil.RandUtil;
-import net.bytten.metazelda.Condition;
-import net.bytten.metazelda.Dungeon;
-import net.bytten.metazelda.Edge;
-import net.bytten.metazelda.IDungeon;
-import net.bytten.metazelda.Room;
-import net.bytten.metazelda.Symbol;
-import net.bytten.metazelda.constraints.IDungeonConstraints;
-import net.bytten.metazelda.util.GenerationFailureException;
-import net.bytten.gameutil.logging.ILogger;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
- * The default and reference implementation of an {@link IDungeonGenerator}.
+ * The default and reference implementation of an {@link IMZDungeonGenerator}.
  */
-public class DungeonGenerator implements IDungeonGenerator, ILogger {
+public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
 
     protected ILogger logger;
     protected long seed;
     protected Random random;
     protected Dungeon dungeon;
-    protected IDungeonConstraints constraints;
+    protected MZIDungeonConstraints constraints;
     protected int maxRetries = 20;
 
-    protected boolean bossRoomLocked, generateGoal;
+    protected boolean bossRoomLocked, GenerateGoal;
 
     /**
      * Creates a DungeonGenerator with a given random seed and places
-     * specific constraints on {@link IDungeon}s it generates.
+     * specific constraints on {@link MZIDungeon}s it Generates.
      *
      * @param seed          the random seed to use
      * @param constraints   the constraints to place on generation
-     * @see net.bytten.metazelda.constraints.IDungeonConstraints
+     * @see net.bytten.metazelda.constraints.MZIDungeonConstraints
      */
     public DungeonGenerator(ILogger logger, long seed,
-            IDungeonConstraints constraints) {
+            MZIDungeonConstraints constraints) {
         this.logger = logger;
         log("Dungeon seed: "+seed);
         this.seed = seed;
@@ -52,10 +33,10 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
         assert constraints != null;
         this.constraints = constraints;
 
-        bossRoomLocked = generateGoal = true;
+        bossRoomLocked = GenerateGoal = true;
     }
 
-    public DungeonGenerator(long seed, IDungeonConstraints constraints) {
+    public DungeonGenerator(long seed, MZIDungeonConstraints constraints) {
         this(null, seed, constraints);
     }
 
@@ -111,7 +92,7 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
             neighbors.remove(choice);
         }
         assert false;
-        throw new GenerationFailureException("Internal error: Room doesn't have a free edge");
+        throw new MZGenerationFailureException("Internal error: Room doesn't have a free edge");
     }
 
     /**
@@ -143,15 +124,13 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
     }
 
     /**
-     * Thrown by several IDungeonGenerator methods that can fail.
-     * Should be caught and handled in {@link #generate}.
+     * Thrown by several IMZDungeonGenerator methods that can fail.
+     * Should be caught and handled in {@link #Generate}.
      */
     protected static class RetryException extends Exception {
-        private static final long serialVersionUID = 1L;
     }
 
     protected static class OutOfRoomsException extends Exception {
-        private static final long serialVersionUID = 1L;
     }
 
     /**
@@ -666,12 +645,12 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
 
     /**
      * Checks with the
-     * {@link net.bytten.metazelda.constraints.IDungeonConstraints} that the
+     * {@link net.bytten.metazelda.constraints.MZIDungeonConstraints} that the
      * dungeon is OK to use.
      *
-     * @throws RetryException if the IDungeonConstraints decided generation must
+     * @throws RetryException if the MZIDungeonConstraints decided generation must
      *                        be re-attempted
-     * @see net.bytten.metazelda.constraints.IDungeonConstraints
+     * @see net.bytten.metazelda.constraints.MZIDungeonConstraints
      */
     protected void checkAcceptable() throws RetryException {
         if (!constraints.isAcceptable(dungeon))
@@ -679,7 +658,7 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
     }
 
     @Override
-    public void generate() {
+    public void Generate() {
         int attempt = 0;
 
         while (true) {
@@ -719,7 +698,7 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
                         log("roomsPerLock is now "+roomsPerLock);
 
                         if (roomsPerLock == 0) {
-                            throw new GenerationFailureException(
+                            throw new MZGenerationFailureException(
                                     "Failed to place rooms. Have you forgotten to disable boss-locking?");
                             // If the boss room is locked, the final key is used
                             // only for the boss room. So if the final key is
@@ -752,7 +731,7 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
 
             } catch (RetryException e) {
                 if (++ attempt > maxRetries) {
-                    throw new GenerationFailureException("Dungeon generator failed", e);
+                    throw new MZGenerationFailureException("Dungeon generator failed", e);
                 }
                 log("Retrying dungeon generation...");
             }
@@ -761,7 +740,7 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
     }
 
     @Override
-    public IDungeon getDungeon() {
+    public MZIDungeon GetDungeon() {
         return dungeon;
     }
 
@@ -774,11 +753,11 @@ public class DungeonGenerator implements IDungeonGenerator, ILogger {
     }
 
     public boolean isGenerateGoal() {
-        return generateGoal;
+        return GenerateGoal;
     }
 
-    public void setGenerateGoal(boolean generateGoal) {
-        this.generateGoal = generateGoal;
+    public void setGenerateGoal(boolean GenerateGoal) {
+        this.GenerateGoal = GenerateGoal;
     }
 
 }

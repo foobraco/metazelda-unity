@@ -1,14 +1,13 @@
-package net.bytten.metazelda.util;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-import java.util.TreeMap;
+public class MZIntMap<V> : Dictionary<int,V> {
+    //private static readonly long serialVersionUID = 1L;
 
-public class IntMap<V> extends TreeMap<Integer,V> {
-    private static final long serialVersionUID = 1L;
-
-    public int newInt() {
-        int k = size();
-        while (containsKey(k)) k++;
+    public int NewInt() {
+        int k = Count;
+        while (ContainsKey(k)) k++;
         return k;
     }
-    
 }

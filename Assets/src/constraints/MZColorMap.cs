@@ -1,13 +1,6 @@
-package net.bytten.metazelda.constraints;
-
-import java.util.Map;
-import java.util.Set;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Vec2IMap;
-import net.bytten.gameutil.Vec2ISet;
-import net.bytten.gameutil.Direction;
-import net.bytten.metazelda.util.GenerationFailureException;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class ColorMap {
     
@@ -98,7 +91,7 @@ public class ColorMap {
     public void checkConnected() {
         if (!isConnected()) {
             // Parts of the map are unreachable!
-            throw new GenerationFailureException("ColorMap is not fully connected");
+            throw new MZGenerationFailureException("ColorMap is not fully connected");
         }
     }
     

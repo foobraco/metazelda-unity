@@ -1,13 +1,6 @@
-package net.bytten.metazelda;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-
-import net.bytten.gameutil.Vec2I;
-import net.bytten.gameutil.Vec2ISet;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
 /**
  * Represents an individual space within the dungeon.
@@ -39,7 +32,7 @@ public class Room {
      * <p>
      * The parent of a room is the parent node of this Room in the initial
      * tree of the dungeon during
-     * {@link net.bytten.metazelda.generators.DungeonGenerator#generate()}, and
+     * {@link net.bytten.metazelda.generators.DungeonGenerator#Generate()}, and
      * before
      * {@link net.bytten.metazelda.generators.DungeonGenerator#graphify()}.
      *
