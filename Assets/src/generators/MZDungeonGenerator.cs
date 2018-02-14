@@ -5,29 +5,29 @@ using UnityEngine;
 /**
  * The default and reference implementation of an {@link IMZDungeonGenerator}.
  */
-public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
+public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
 
     protected ILogger logger;
     protected long seed;
     protected Random random;
-    protected Dungeon dungeon;
-    protected MZIDungeonConstraints constraints;
+    protected MZDungeon dungeon;
+    protected IMZDungeonConstraints constraints;
     protected int maxRetries = 20;
 
-    protected boolean bossRoomLocked, GenerateGoal;
+    protected bool bossRoomLocked, GenerateGoal;
 
     /**
-     * Creates a DungeonGenerator with a given random seed and places
-     * specific constraints on {@link MZIDungeon}s it Generates.
+     * Creates a MZDungeonGenerator with a given random seed and places
+     * specific constraints on {@link IMZDungeon}s it Generates.
      *
      * @param seed          the random seed to use
      * @param constraints   the constraints to place on generation
-     * @see net.bytten.metazelda.constraints.MZIDungeonConstraints
+     * @see net.bytten.metazelda.constraints.IMZDungeonConstraints
      */
-    public DungeonGenerator(ILogger logger, long seed,
-            MZIDungeonConstraints constraints) {
+    public MZDungeonGenerator(ILogger logger, long seed,
+            IMZDungeonConstraints constraints) {
         this.logger = logger;
-        log("Dungeon seed: "+seed);
+        log("MZDungeon seed: "+seed);
         this.seed = seed;
         this.random = new Random(seed);
         assert constraints != null;
@@ -36,7 +36,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
         bossRoomLocked = GenerateGoal = true;
     }
 
-    public DungeonGenerator(long seed, MZIDungeonConstraints constraints) {
+    public MZDungeonGenerator(long seed, IMZDungeonConstraints constraints) {
         this(null, seed, constraints);
     }
 
@@ -62,10 +62,10 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
         List<Room> rooms = new ArrayList<Room>(roomCollection);
         Collections.shuffle(rooms, random);
         for (int i = 0; i < rooms.size(); ++i) {
-            Room room = rooms.get(i);
-            for (Pair<Double,Integer> next:
-                    constraints.getAdjacentRooms(room.id, keyLevel)) {
-                if (dungeon.get(next.second) == null) {
+            Room room = rooms.Get(i);
+            for (Pair<Double,int> next:
+                    constraints.GetAdjacentRooms(room.id, keyLevel)) {
+                if (dungeon.Get(next.second) == null) {
                     return room;
                 }
             }
@@ -82,12 +82,12 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      *          null if there are no adjacent empty spaces
      */
     protected int chooseFreeEdge(Room room, int keyLevel) {
-        List<Pair<Double,Integer>> neighbors = new ArrayList<Pair<Double,Integer>>(
-                constraints.getAdjacentRooms(room.id, keyLevel));
+        List<Pair<Double,int>> neighbors = new ArrayList<Pair<Double,int>>(
+                constraints.GetAdjacentRooms(room.id, keyLevel));
         Collections.shuffle(neighbors, random);
         while (!neighbors.isEmpty()) {
-            Integer choice = RandUtil.choice(random, neighbors);
-            if (dungeon.get(choice) == null)
+            int choice = RandUtil.choice(random, neighbors);
+            if (dungeon.Get(choice) == null)
                 return choice;
             neighbors.remove(choice);
         }
@@ -100,26 +100,26 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      * <p>
      * A 'keyLevel' is the count of the number of unique keys are needed for all
      * the locks we've placed. For example, all the rooms in keyLevel 0 are
-     * accessible without collecting any keys, while to get to rooms in
+     * accessible without collecting any keys, while to Get to rooms in
      * keyLevel 3, the player must have collected at least 3 keys.
      */
     protected class KeyLevelRoomMapping {
         protected List<List<Room>> map = new ArrayList<List<Room>>(
-                constraints.getMaxKeys());
+                constraints.GetMaxKeys());
 
-        List<Room> getRooms(int keyLevel) {
-            while (keyLevel >= map.size()) map.add(null);
-            if (map.get(keyLevel) == null)
-                map.set(keyLevel, new ArrayList<Room>());
-            return map.get(keyLevel);
+        List<Room> GetRooms(int keyLevel) {
+            while (keyLevel >= map.Count) map.Add(null);
+            if (map.Get(keyLevel) == null)
+                map.Set(keyLevel, new ArrayList<Room>());
+            return map.Get(keyLevel);
         }
 
-        void addRoom(int keyLevel, Room room) {
-            getRooms(keyLevel).add(room);
+        void AddRoom(int keyLevel, Room room) {
+            GetRooms(keyLevel).Add(room);
         }
 
         int keyCount() {
-            return map.size();
+            return map.Count;
         }
     }
 
@@ -150,8 +150,8 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
     INTENSITY_COMPARATOR = new Comparator<Room>() {
         @Override
         public int compare(Room arg0, Room arg1) {
-            return arg0.getIntensity() > arg1.getIntensity() ? -1
-                    : arg0.getIntensity() < arg1.getIntensity() ? 1
+            return arg0.GetIntensity() > arg1.GetIntensity() ? -1
+                    : arg0.GetIntensity() < arg1.GetIntensity() ? 1
                             : 0;
         }
     };
@@ -165,20 +165,20 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
     protected void initEntranceRoom(KeyLevelRoomMapping levels)
             throws RetryException {
         int id;
-        List<Integer> possibleEntries = new ArrayList<Integer>(
+        List<int> possibleEntries = new ArrayList<int>(
                 constraints.initialRooms());
         assert possibleEntries.size() > 0;
-        id = possibleEntries.get(random.nextInt(possibleEntries.size()));
+        id = possibleEntries.Get(random.nextInt(possibleEntries.size()));
 
-        Room entry = new Room(id, constraints.getCoords(id), null,
-                new Symbol(Symbol.START), new Condition());
-        dungeon.add(entry);
+        Room entry = new Room(id, constraints.GetCoords(id), null,
+                new MZSymbol(MZSymbol.START), new MZCondition());
+        dungeon.Add(entry);
 
         levels.addRoom(0, entry);
     }
 
     /**
-     * Decides whether to add a new lock (and keyLevel) at this point.
+     * Decides whether to Add a new lock (and keyLevel) at this point.
      *
      * @param keyLevel the number of distinct locks that have been placed into
      *      the map so far
@@ -187,8 +187,8 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      *      as the target number of rooms to place at each keyLevel (which
      *      subclasses can ignore, if desired).
      */
-    protected boolean shouldAddNewLock(int keyLevel, int numRooms, int targetRoomsPerLock) {
-        int usableKeys = constraints.getMaxKeys();
+    protected bool shouldAddNewLock(int keyLevel, int numRooms, int targetRoomsPerLock) {
+        int usableKeys = constraints.GetMaxKeys();
         if (isBossRoomLocked())
             usableKeys -= 1;
         return numRooms >= targetRoomsPerLock && keyLevel < usableKeys;
@@ -205,33 +205,33 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
     protected void placeRooms(KeyLevelRoomMapping levels, int roomsPerLock)
             throws RetryException, OutOfRoomsException {
 
-        // keyLevel: the number of keys required to get to the new room
+        // keyLevel: the number of keys required to Get to the new room
         int keyLevel = 0;
-        Symbol latestKey = null;
+        MZSymbol latestKey = null;
         // condition that must hold true for the player to reach the new room
         // (the set of keys they must have).
-        Condition cond = new Condition();
+        MZCondition cond = new MZCondition();
 
         // Loop to place rooms and link them
-        while (dungeon.roomCount() < constraints.getMaxRooms()) {
+        while (dungeon.roomCount() < constraints.GetMaxRooms()) {
 
-            boolean doLock = false;
+            bool doLock = false;
 
             // Decide whether we need to place a new lock
             // (Don't place the last lock, since that's reserved for the boss)
-            if (shouldAddNewLock(keyLevel, levels.getRooms(keyLevel).size(), roomsPerLock)) {
-                latestKey = new Symbol(keyLevel++);
-                cond = cond.and(latestKey);
+            if (shouldAddNewLock(keyLevel, levels.GetRooms(keyLevel).size(), roomsPerLock)) {
+                latestKey = new MZSymbol(keyLevel++);
+                cond = cond.And(latestKey);
                 doLock = true;
             }
 
             // Find an existing room with a free edge:
             Room parentRoom = null;
             if (!doLock && random.nextInt(10) > 0)
-                parentRoom = chooseRoomWithFreeEdge(levels.getRooms(keyLevel),
+                parentRoom = chooseRoomWithFreeEdge(levels.GetRooms(keyLevel),
                         keyLevel);
             if (parentRoom == null) {
-                parentRoom = chooseRoomWithFreeEdge(dungeon.getRooms(),
+                parentRoom = chooseRoomWithFreeEdge(dungeon.GetRooms(),
                         keyLevel);
                 doLock = true;
             }
@@ -242,13 +242,13 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
             // Decide which direction to put the new room in relative to the
             // parent
             int nextId = chooseFreeEdge(parentRoom, keyLevel);
-            Set<Vec2I> coords = constraints.getCoords(nextId);
+            Set<Vector2Int> coords = constraints.GetCoords(nextId);
             Room room = new Room(nextId, coords, parentRoom, null, cond);
 
             // Add the room to the dungeon
-            assert dungeon.get(room.id) == null;
+            assert dungeon.Get(room.id) == null;
             synchronized (dungeon) {
-                dungeon.add(room);
+                dungeon.Add(room);
                 parentRoom.addChild(room);
                 dungeon.link(parentRoom, room, doLock ? latestKey : null);
             }
@@ -268,17 +268,17 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
             throws RetryException {
         List<Room> possibleGoalRooms = new ArrayList<Room>(dungeon.roomCount());
 
-        Symbol goalSym = new Symbol(Symbol.GOAL),
-               bossSym = new Symbol(Symbol.BOSS);
+        MZSymbol goalSym = new MZSymbol(MZSymbol.GOAL),
+               bossSym = new MZSymbol(MZSymbol.BOSS);
 
-        for (Room room: dungeon.getRooms()) {
-            if (room.getChildren().size() > 0 || room.getItem() != null)
+        for (Room room: dungeon.GetRooms()) {
+            if (room.GetChildren().size() > 0 || room.GetItem() != null)
                 continue;
-            Room parent = room.getParent();
+            Room parent = room.GetParent();
             if (parent == null)
                 continue;
-            if (isGenerateGoal() && (parent.getChildren().size() != 1 ||
-                    !parent.getPrecond().implies(room.getPrecond())))
+            if (isGenerateGoal() && (parent.GetChildren().size() != 1 ||
+                    !parent.GetPrecond().Implies(room.GetPrecond())))
                 continue;
             if (isGenerateGoal()) {
                 if (!constraints.roomCanFitItem(room.id, goalSym) ||
@@ -288,14 +288,14 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
                 if (!constraints.roomCanFitItem(room.id, bossSym))
                     continue;
             }
-            possibleGoalRooms.add(room);
+            possibleGoalRooms.Add(room);
         }
 
         if (possibleGoalRooms.size() == 0) throw new RetryException();
 
-        Room goalRoom = possibleGoalRooms.get(random.nextInt(
+        Room goalRoom = possibleGoalRooms.Get(random.nextInt(
                 possibleGoalRooms.size())),
-             bossRoom = goalRoom.getParent();
+             bossRoom = goalRoom.GetParent();
 
         if (!isGenerateGoal()) {
             bossRoom = goalRoom;
@@ -305,26 +305,26 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
         if (goalRoom != null) goalRoom.setItem(goalSym);
         bossRoom.setItem(bossSym);
 
-        int oldKeyLevel = bossRoom.getPrecond().getKeyLevel(),
-            newKeyLevel = Math.min(levels.keyCount(), constraints.getMaxKeys());
+        int oldKeyLevel = bossRoom.GetPrecond().GetKeyLevel(),
+            newKeyLevel = Math.min(levels.keyCount(), constraints.GetMaxKeys());
 
         if (oldKeyLevel != newKeyLevel) {
-            List<Room> oklRooms = levels.getRooms(oldKeyLevel);
+            List<Room> oklRooms = levels.GetRooms(oldKeyLevel);
             if (goalRoom != null) oklRooms.remove(goalRoom);
             oklRooms.remove(bossRoom);
 
             if (goalRoom != null) levels.addRoom(newKeyLevel, goalRoom);
             levels.addRoom(newKeyLevel, bossRoom);
 
-            Symbol bossKey = new Symbol(newKeyLevel-1);
-            Condition precond = bossRoom.getPrecond().and(bossKey);
+            MZSymbol bossKey = new MZSymbol(newKeyLevel-1);
+            MZCondition precond = bossRoom.GetPrecond().And(bossKey);
             bossRoom.setPrecond(precond);
             if (goalRoom != null) goalRoom.setPrecond(precond);
 
             if (newKeyLevel == 0) {
-                dungeon.link(bossRoom.getParent(), bossRoom);
+                dungeon.link(bossRoom.GetParent(), bossRoom);
             } else {
-                dungeon.link(bossRoom.getParent(), bossRoom, bossKey);
+                dungeon.link(bossRoom.GetParent(), bossRoom, bossKey);
             }
             if (goalRoom != null) dungeon.link(bossRoom, goalRoom);
         }
@@ -339,7 +339,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      */
     protected void removeDescendantsFromList(List<Room> rooms, Room room) {
         rooms.remove(room);
-        for (Room child: room.getChildren()) {
+        for (Room child: room.GetChildren()) {
             removeDescendantsFromList(rooms, child);
         }
     }
@@ -348,54 +348,54 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      * Adds extra conditions to the given {@link Room}'s preconditions and all
      * of its descendants.
      *
-     * @param room  the Room to add extra preconditions to
-     * @param cond  the extra preconditions to add
+     * @param room  the Room to Add extra preconditions to
+     * @param cond  the extra preconditions to Add
      */
-    protected void addPrecond(Room room, Condition cond) {
-        room.setPrecond(room.getPrecond().and(cond));
-        for (Room child: room.getChildren()) {
-            addPrecond(child, cond);
+    protected void AddPrecond(Room room, MZCondition cond) {
+        room.setPrecond(room.GetPrecond().And(cond));
+        for (Room child: room.GetChildren()) {
+            AddPrecond(child, cond);
         }
     }
 
     /**
      * Randomly locks descendant rooms of the given {@link Room} with
-     * {@link Edge}s that require the switch to be in the given state.
+     * {@link MZEdge}s that require the switch to be in the given state.
      * <p>
-     * If the given state is EITHER, the required states will be random.
+     * If the given state is Either, the required states will be random.
      *
      * @param room          the room whose child to lock
      * @param givenState    the state to require the switch to be in for the
      *                      child rooms to be accessible
-     * @return              true if any locks were added, false if none were
-     *                      added (which can happen due to the way the random
+     * @return              true if any locks were Added, false if none were
+     *                      Added (which can happen due to the way the random
      *                      decisions are made)
-     * @see Condition.SwitchState
+     * @see MZCondition.SwitchState
      */
-    protected boolean switchLockChildRooms(Room room,
-            Condition.SwitchState givenState) {
-        boolean anyLocks = false;
-        Condition.SwitchState state = givenState != Condition.SwitchState.EITHER
+    protected bool switchLockChildRooms(Room room,
+            MZCondition.SwitchState givenState) {
+        bool anyLocks = false;
+        MZCondition.SwitchState state = givenState != MZCondition.SwitchState.Either
                 ? givenState
                 : (random.nextInt(2) == 0
-                    ? Condition.SwitchState.ON
-                    : Condition.SwitchState.OFF);
+                    ? MZCondition.SwitchState.On
+                    : MZCondition.SwitchState.Off);
 
-        for (Edge edge: room.getEdges()) {
-            int neighborId = edge.getTargetRoomId();
-            Room nextRoom = dungeon.get(neighborId);
-            if (room.getChildren().contains(nextRoom)) {
-                if (room.getEdge(neighborId).getSymbol() == null &&
+        for (MZEdge edge: room.GetEdges()) {
+            int neighborId = edge.GetTargetRoomId();
+            Room nextRoom = dungeon.Get(neighborId);
+            if (room.GetChildren().contains(nextRoom)) {
+                if (room.GetEdge(neighborId).GetSymbol() == null &&
                         random.nextInt(4) != 0) {
-                    dungeon.link(room, nextRoom, state.toSymbol());
-                    addPrecond(nextRoom, new Condition(state.toSymbol()));
+                    dungeon.link(room, nextRoom, state.ToSymbol());
+                    AddPrecond(nextRoom, new MZCondition(state.ToSymbol()));
                     anyLocks = true;
                 } else {
                     anyLocks |= switchLockChildRooms(nextRoom, state);
                 }
 
-                if (givenState == Condition.SwitchState.EITHER) {
-                    state = state.invert();
+                if (givenState == MZCondition.SwitchState.Either) {
+                    state = state.Invert();
                 }
             }
         }
@@ -409,18 +409,18 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @return  a list of linked {@link Room}s starting with the goal room and
      *          ending with the start room.
      */
-    protected List<Room> getSolutionPath() {
+    protected List<Room> GetSolutionPath() {
         List<Room> solution = new ArrayList<Room>();
         Room room = dungeon.findGoal();
         while (room != null) {
-            solution.add(room);
-            room = room.getParent();
+            solution.Add(room);
+            room = room.GetParent();
         }
         return solution;
     }
 
     /**
-     * Makes some {@link Edge}s within the dungeon require the dungeon's switch
+     * Makes some {@link MZEdge}s within the dungeon require the dungeon's switch
      * to be in a particular state, and places the switch in a room in the
      * dungeon.
      *
@@ -429,13 +429,13 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
     protected void placeSwitches() throws RetryException {
         // Possible TODO: have multiple switches on separate circuits
         // At the moment, we only have one switch per dungeon.
-        if (constraints.getMaxSwitches() <= 0) return;
+        if (constraints.GetMaxSwitches() <= 0) return;
 
-        List<Room> solution = getSolutionPath();
+        List<Room> solution = GetSolutionPath();
 
         for (int attempt = 0; attempt < 10; ++attempt) {
 
-            List<Room> rooms = new ArrayList<Room>(dungeon.getRooms());
+            List<Room> rooms = new ArrayList<Room>(dungeon.GetRooms());
             Collections.shuffle(rooms, random);
             Collections.shuffle(solution, random);
 
@@ -443,22 +443,22 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
             // will have to encounter a switch-lock to solve the dungeon.
             Room baseRoom = null;
             for (Room room: solution) {
-                if (room.getChildren().size() > 1 && room.getParent() != null) {
+                if (room.GetChildren().size() > 1 && room.GetParent() != null) {
                     baseRoom = room;
                     break;
                 }
             }
             if (baseRoom == null) throw new RetryException();
-            Condition baseRoomCond = baseRoom.getPrecond();
+            MZCondition baseRoomCond = baseRoom.GetPrecond();
 
             removeDescendantsFromList(rooms, baseRoom);
 
-            Symbol switchSym = new Symbol(Symbol.SWITCH);
+            MZSymbol switchSym = new MZSymbol(MZSymbol.Switch);
 
             Room switchRoom = null;
             for (Room room: rooms) {
-                if (room.getItem() == null &&
-                        baseRoomCond.implies(room.getPrecond()) &&
+                if (room.GetItem() == null &&
+                        baseRoomCond.Implies(room.GetPrecond()) &&
                         constraints.roomCanFitItem(room.id, switchSym)) {
                     switchRoom = room;
                     break;
@@ -466,7 +466,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
             }
             if (switchRoom == null) continue;
 
-            if (switchLockChildRooms(baseRoom, Condition.SwitchState.EITHER)) {
+            if (switchLockChildRooms(baseRoom, MZCondition.SwitchState.Either)) {
                 switchRoom.setItem(switchSym);
                 return;
             }
@@ -481,23 +481,23 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @throws RetryException if it fails
      */
     protected void graphify() throws RetryException {
-        for (Room room: dungeon.getRooms()) {
+        for (Room room: dungeon.GetRooms()) {
 
             if (room.isGoal() || room.isBoss()) continue;
 
-            for (Pair<Double,Integer> next:
+            for (Pair<Double,int> next:
                     // Doesn't matter what the keyLevel is; later checks about
                     // preconds ensure linkage doesn't trivialize the puzzle.
-                    constraints.getAdjacentRooms(room.id, Integer.MAX_VALUE)) {
+                    constraints.GetAdjacentRooms(room.id, Int32.MaxValue)) {
                 int nextId = next.second;
-                if (room.getEdge(nextId) != null) continue;
+                if (room.GetEdge(nextId) != null) continue;
 
-                Room nextRoom = dungeon.get(nextId);
+                Room nextRoom = dungeon.Get(nextId);
                 if (nextRoom == null || nextRoom.isGoal() || nextRoom.isBoss())
                     continue;
 
-                boolean forwardImplies = room.getPrecond().implies(nextRoom.getPrecond()),
-                        backwardImplies = nextRoom.getPrecond().implies(room.getPrecond());
+                bool forwardImplies = room.GetPrecond().Implies(nextRoom.GetPrecond()),
+                        backwardImplies = nextRoom.GetPrecond().Implies(room.GetPrecond());
                 if (forwardImplies && backwardImplies) {
                     // both rooms are at the same keyLevel.
                     if (random.nextDouble() >=
@@ -506,8 +506,8 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
 
                     dungeon.link(room, nextRoom);
                 } else {
-                    Symbol difference = room.getPrecond().singleSymbolDifference(
-                            nextRoom.getPrecond());
+                    MZSymbol difference = room.GetPrecond().SingleSymbolDifference(
+                            nextRoom.GetPrecond());
                     if (difference == null || (!difference.isSwitchState() &&
                             random.nextDouble() >=
                                 constraints.edgeGraphifyProbability(room.id, nextRoom.id)))
@@ -531,7 +531,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
         // key for the next level in it, preferring rooms with fewest links
         // (dead end rooms).
         for (int key = 0; key < levels.keyCount()-1; ++key) {
-            List<Room> rooms = levels.getRooms(key);
+            List<Room> rooms = levels.GetRooms(key);
 
             Collections.shuffle(rooms, random);
             // Collections.sort is stable: it doesn't reorder "equal" elements,
@@ -540,11 +540,11 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
             // Alternatively, use the EDGE_COUNT_COMPARATOR to put keys at
             // 'dead end' rooms.
 
-            Symbol keySym = new Symbol(key);
+            MZSymbol keySym = new MZSymbol(key);
 
-            boolean placedKey = false;
+            bool placedKey = false;
             for (Room room: rooms) {
-                if (room.getItem() == null && constraints.roomCanFitItem(room.id, keySym)) {
+                if (room.GetItem() == null && constraints.roomCanFitItem(room.id, keySym)) {
                     room.setItem(keySym);
                     placedKey = true;
                     break;
@@ -558,7 +558,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
 
     protected static final double
             INTENSITY_GROWTH_JITTER = 0.1,
-            INTENSITY_EASE_OFF = 0.2;
+            INTENSITY_EASE_Off = 0.2;
 
     /**
      * Recursively applies the given intensity to the given {@link Room}, and
@@ -570,7 +570,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      *
      * @param room      the room to set the intensity of
      * @param intensity the value to set intensity to (some randomn variance is
-     *                  added)
+     *                  Added)
      * @see Room
      */
     protected double applyIntensity(Room room, double intensity) {
@@ -580,9 +580,9 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
         room.setIntensity(intensity);
 
         double maxIntensity = intensity;
-        for (Room child: room.getChildren()) {
-            if (room.getPrecond().implies(child.getPrecond())) {
-                maxIntensity = Math.max(maxIntensity, applyIntensity(child,
+        for (Room child: room.GetChildren()) {
+            if (room.GetPrecond().Implies(child.GetPrecond())) {
+                maxIntensity = Math.Max(maxIntensity, applyIntensity(child,
                         intensity + 1.0));
             }
         }
@@ -598,16 +598,16 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
      */
     protected void normalizeIntensity() {
         double maxIntensity = 0.0;
-        for (Room room: dungeon.getRooms()) {
-            maxIntensity = Math.max(maxIntensity, room.getIntensity());
+        for (Room room: dungeon.GetRooms()) {
+            maxIntensity = Math.Max(maxIntensity, room.GetIntensity());
         }
-        for (Room room: dungeon.getRooms()) {
-            room.setIntensity(room.getIntensity() * 0.99 / maxIntensity);
+        for (Room room: dungeon.GetRooms()) {
+            room.setIntensity(room.GetIntensity() * 0.99 / maxIntensity);
         }
     }
 
     /**
-     * Computes the 'intensity' of each {@link Room}. Rooms generally get more
+     * Computes the 'intensity' of each {@link Room}. Rooms generally Get more
      * intense the deeper they are into the dungeon.
      *
      * @param levels    the keyLevel -> room-set mapping to update
@@ -622,13 +622,13 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
         for (int level = 0; level < levels.keyCount(); ++level) {
 
             double intensity = nextLevelBaseIntensity *
-                    (1.0 - INTENSITY_EASE_OFF);
+                    (1.0 - INTENSITY_EASE_Off);
 
-            for (Room room: levels.getRooms(level)) {
-                if (room.getParent() == null ||
-                        !room.getParent().getPrecond().
-                            implies(room.getPrecond())) {
-                    nextLevelBaseIntensity = Math.max(
+            for (Room room: levels.GetRooms(level)) {
+                if (room.GetParent() == null ||
+                        !room.GetParent().GetPrecond().
+                            Implies(room.GetPrecond())) {
+                    nextLevelBaseIntensity = Math.Max(
                             nextLevelBaseIntensity,
                             applyIntensity(room, intensity));
                 }
@@ -645,12 +645,12 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
 
     /**
      * Checks with the
-     * {@link net.bytten.metazelda.constraints.MZIDungeonConstraints} that the
+     * {@link net.bytten.metazelda.constraints.IMZDungeonConstraints} that the
      * dungeon is OK to use.
      *
-     * @throws RetryException if the MZIDungeonConstraints decided generation must
+     * @throws RetryException if the IMZDungeonConstraints decided generation must
      *                        be re-attempted
-     * @see net.bytten.metazelda.constraints.MZIDungeonConstraints
+     * @see net.bytten.metazelda.constraints.IMZDungeonConstraints
      */
     protected void checkAcceptable() throws RetryException {
         if (!constraints.isAcceptable(dungeon))
@@ -665,14 +665,14 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
             try {
                 KeyLevelRoomMapping levels;
                 int roomsPerLock;
-                if (constraints.getMaxKeys() > 0) {
-                    roomsPerLock = constraints.getMaxRooms() /
-                        constraints.getMaxKeys();
+                if (constraints.GetMaxKeys() > 0) {
+                    roomsPerLock = constraints.GetMaxRooms() /
+                        constraints.GetMaxKeys();
                 } else {
-                    roomsPerLock = constraints.getMaxRooms();
+                    roomsPerLock = constraints.GetMaxRooms();
                 }
                 while (true) {
-                    dungeon = new Dungeon();
+                    dungeon = new MZDungeon();
 
                     // Maps keyLevel -> Rooms that were created when lockCount had that
                     // value
@@ -693,8 +693,8 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
                         // enough rooms before the river to build up to the
                         // key for the river, we've run out of rooms.
                         log("Ran out of rooms. roomsPerLock was "+roomsPerLock);
-                        roomsPerLock = roomsPerLock * constraints.getMaxKeys() /
-                                (constraints.getMaxKeys() + 1);
+                        roomsPerLock = roomsPerLock * constraints.GetMaxKeys() /
+                                (constraints.GetMaxKeys() + 1);
                         log("roomsPerLock is now "+roomsPerLock);
 
                         if (roomsPerLock == 0) {
@@ -719,7 +719,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
                 // Place the keys within the dungeon:
                 placeKeys(levels);
 
-                if (levels.keyCount()-1 != constraints.getMaxKeys())
+                if (levels.keyCount()-1 != constraints.GetMaxKeys())
                     throw new RetryException();
 
                 // Make the dungeon less tree-like:
@@ -731,7 +731,7 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
 
             } catch (RetryException e) {
                 if (++ attempt > maxRetries) {
-                    throw new MZGenerationFailureException("Dungeon generator failed", e);
+                    throw new MZGenerationFailureException("MZDungeon generator failed", e);
                 }
                 log("Retrying dungeon generation...");
             }
@@ -740,23 +740,23 @@ public class DungeonGenerator implements IMZDungeonGenerator, ILogger {
     }
 
     @Override
-    public MZIDungeon GetDungeon() {
+    public IMZDungeon GetMZDungeon() {
         return dungeon;
     }
 
-    public boolean isBossRoomLocked() {
+    public bool isBossRoomLocked() {
         return bossRoomLocked;
     }
 
-    public void setBossRoomLocked(boolean bossRoomLocked) {
+    public void setBossRoomLocked(bool bossRoomLocked) {
         this.bossRoomLocked = bossRoomLocked;
     }
 
-    public boolean isGenerateGoal() {
+    public bool isGenerateGoal() {
         return GenerateGoal;
     }
 
-    public void setGenerateGoal(boolean GenerateGoal) {
+    public void setGenerateGoal(bool GenerateGoal) {
         this.GenerateGoal = GenerateGoal;
     }
 

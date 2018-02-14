@@ -1,25 +1,27 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class ColorMap {
     
     protected int xsum, ysum, xmin, xmax, ymin, ymax;
-    protected Map<Vec2I, Integer> map;
+    protected Dictionary<Vector2Int, int> map;
 
     public ColorMap() {
-        map = new Vec2IMap<Integer>();
-        ymin = xmin = Integer.MAX_VALUE;
-        ymax = xmax = Integer.MIN_VALUE;
+        map = new Dictionary<Vector2Int, int>();
+        ymin = xmin = Int32.MaxValue;
+        ymax = xmax = Int32.MinValue;
     }
     
-    public void set(int x, int y, int color) {
-        Vec2I xy = new Vec2I(x,y);
-        if (map.get(xy) == null) {
+    public void Set(int x, int y, int color) {
+        Vector2Int xy = new Vector2Int(x,y);
+
+        if (map.ContainsKey(xy) == false) {
             xsum += x;
             ysum += y;
         }
-        map.put(xy, color);
+        map[xy] = color;
         
         if (x < xmin) xmin = x;
         if (x > xmax) xmax = x;
@@ -27,60 +29,58 @@ public class ColorMap {
         if (y > ymax) ymax = y;
     }
     
-    public Integer get(int x, int y) {
-        return map.get(new Vec2I(x,y));
+    public int Get(int x, int y) {
+        return map[new Vector2Int(x,y)];
     }
     
-    public Vec2I getCenter() {
-        return new Vec2I(xsum/map.size(), ysum/map.size());
+    public Vector2Int GetCenter() {
+        return new Vector2Int(xsum/map.Count, ysum/map.Count);
     }
     
-    public int getWidth() {
+    public int GetWidth() {
         return xmax-xmin+1;
     }
     
-    public int getHeight() {
+    public int GetHeight() {
         return ymax-ymin+1;
     }
     
-    public int getLeft() {
+    public int GetLeft() {
         return xmin;
     }
     
-    public int getTop() {
+    public int GetTop() {
         return ymin;
     }
     
-    public int getRight() {
+    public int GetRight() {
         return xmax;
     }
     
-    public int getBottom() {
+    public int GetBottom() {
         return ymax;
     }
     
-    protected boolean isConnected() {
-        if (map.size() == 0) return false;
-        
+    protected bool IsConnected() {
+        if (map.Count == 0) return false;
+
         // Do a breadth first search starting at the top left to check if
         // every position is reachable.
-        Set<Vec2I> world = new Vec2ISet(map.keySet()),
-                    queue = new Vec2ISet();
+        Queue<Vector2Int> world = new Queue<Vector2Int>(map.Keys);
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+
+        Vector2Int first = world.Dequeue();
+        queue.Enqueue(first);
         
-        Vec2I first = world.iterator().next();
-        world.remove(first);
-        queue.add(first);
-        
-        while (!queue.isEmpty()) {
-            Vec2I pos = queue.iterator().next();
-            queue.remove(pos);
+        while (queue.Count > 0) {
+            Vector2Int pos = queue.Dequeue();
             
             for (Direction d: Direction.CARDINALS) {
-                Vec2I neighbor = pos.add(d);
+                Vector2Int neighbor = pos.Add(d);
                 
                 if (world.contains(neighbor)) {
                     world.remove(neighbor);
-                    queue.add(neighbor);
+                    queue.Add(neighbor);
                 }
             }
         }
@@ -89,7 +89,7 @@ public class ColorMap {
     }
     
     public void checkConnected() {
-        if (!isConnected()) {
+        if (!IsConnected()) {
             // Parts of the map are unreachable!
             throw new MZGenerationFailureException("ColorMap is not fully connected");
         }

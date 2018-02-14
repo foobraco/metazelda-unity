@@ -13,25 +13,25 @@ using UnityEngine;
 public class SpaceConstraints extends CountConstraints {
 
     public static final int DEFAULT_MAX_KEYS = 4,
-            DEFAULT_MAX_SWITCHES = 1;
+            DEFAULT_MAX_SwitchES = 1;
     
     protected SpaceMap spaceMap;
     
     public SpaceConstraints(SpaceMap spaceMap) {
-        super(spaceMap.numberSpaces(), DEFAULT_MAX_KEYS, DEFAULT_MAX_SWITCHES);
+        super(spaceMap.numberSpaces(), DEFAULT_MAX_KEYS, DEFAULT_MAX_SwitchES);
         this.spaceMap = spaceMap;
     }
 
     @Override
-    protected boolean validRoomCoords(Vec2I c) {
-        return spaceMap.get(c);
+    protected bool validRoomCoords(Vector2Int c) {
+        return spaceMap.Get(c);
     }
 
     @Override
-    public Collection<Integer> initialRooms() {
-        List<Integer> ids = new ArrayList<Integer>();
-        for (Vec2I xy: spaceMap.getBottomSpaces()) {
-            ids.add(getRoomId(xy));
+    public Collection<int> initialRooms() {
+        List<int> ids = new ArrayList<int>();
+        for (Vector2Int xy: spaceMap.GetBottomSpaces()) {
+            ids.Add(getRoomId(xy));
         }
         return ids;
     }

@@ -4,32 +4,32 @@ using UnityEngine;
 
 /**
  * Represents the spacial layout of a lock-and-key puzzle and contains all
- * {@link Symbol}s, {@link Room}s and {@link Edge}s within the puzzle.
+ * {@link MZSymbol}s, {@link Room}s and {@link MZEdge}s within the puzzle.
  */
-public interface MZIDungeon {
-
+public interface IMZDungeon {
     /**
      * @return  the rooms within the dungeon
      */
-    public abstract Collection<Room> getRooms();
+    Dictionary<int, Room>.ValueCollection GetRooms();
+
     /**
      * @return the number of rooms in the dungeon
      */
-    public abstract int roomCount();
+    int RoomCount();
 
     /**
      * @param id        the id of the room
      * @return  the room with the given id
      */
-    public abstract Room get(int id);
+    Room Get(int id);
 
     /**
      * Adds a new room to the dungeon, overwriting any rooms already in it that
      * have the same coordinates.
      * 
-     * @param room  the room to add
+     * @param room  the room to Add
      */
-    public abstract void add(Room room);
+    void Add(Room room);
 
     /**
      * Adds a one-way unconditional edge between the given rooms.
@@ -57,7 +57,7 @@ public interface MZIDungeon {
      * @param room2 the second room to link
      * @param cond  the condition on the edge
      */
-    public abstract void linkOneWay(Room room1, Room room2, Symbol cond);
+    public abstract void linkOneWay(Room room1, Room room2, MZSymbol cond);
     /**
      * Adds a two-way conditional edge between the given rooms.
      * A two-way edge may be used to travel from each room to the other.
@@ -66,7 +66,7 @@ public interface MZIDungeon {
      * @param room2 the second room to link
      * @param cond  the condition on the edge
      */
-    public abstract void link(Room room1, Room room2, Symbol cond);
+    public abstract void link(Room room1, Room room2, MZSymbol cond);
     /**
      * Tests whether two rooms are linked.
      * Two rooms are linked if there are any edges (in any direction) between
@@ -74,7 +74,7 @@ public interface MZIDungeon {
      * 
      * @return  true if the rooms are linked, false otherwise
      */
-    public abstract boolean roomsAreLinked(Room room1, Room room2);
+    public abstract bool roomsAreLinked(Room room1, Room room2);
     
     /**
      * @return  the room containing the START symbol
@@ -89,7 +89,7 @@ public interface MZIDungeon {
      */
     public abstract Room findGoal();
     /**
-     * @return  the room containing the SWITCH symbol
+     * @return  the room containing the Switch symbol
      */
     public abstract Room findSwitch();
     
@@ -102,6 +102,6 @@ public interface MZIDungeon {
      * 
      * @return  the rectangle enclosing every room within the dungeon
      */
-    public abstract Rect2I getExtentBounds();
+    public abstract Rect2I GetExtentBounds();
 
 }

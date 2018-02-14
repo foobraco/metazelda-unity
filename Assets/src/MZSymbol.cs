@@ -5,19 +5,19 @@ using UnityEngine;
 /**
  * Represents a single key or lock within the lock-and-key puzzle.
  * <p>
- * Each Symbol has a 'value'. Two Symbols are equivalent iff they have the same
+ * Each MZSymbol has a 'value'. Two MZSymbols are equivalent iff they have the same
  * 'value'.
  */
-public class MZSymbol : MonoBehaviour{
+public class MZSymbol {
     /**
-     * Symbol map with special meanings.
+     * MZSymbol map with special meanings.
      * <p>
      * Certain items (such as (int) MZSymbolValue.Start, (int) MZSymbolValue.Goal, MZSymbolValue.Boss) serve no purpose in the puzzle
      * other than as markers for the client of the library to place special game
      * objects.
      * <p>
      * The MZSymbolValue.SwitchOn and MZSymbolValue.SwitchOff symbols do not appear in rooms, only in
-     * {@link Condition}s and {@link Edge}s.
+     * {@link MZCondition}s and {@link MZEdge}s.
      * <p>
      * The MZSymbolValue.Switch item does not give the player the MZSymbolValue.Switch symbol, instead the
      * player may choose to either
@@ -39,12 +39,12 @@ public class MZSymbol : MonoBehaviour{
     }
 
     protected readonly int value;
-    //protected readonly string name;
+    protected readonly string name;
     
     /**
-     * Creates a Symbol with the given value.
+     * Creates a MZSymbol with the given value.
      * 
-     * @param value value to give the Symbol
+     * @param value value to give the MZSymbol
      */
     public MZSymbol(int value) {
         this.value = value;
@@ -56,9 +56,9 @@ public class MZSymbol : MonoBehaviour{
         else if (value == (int) MZSymbolValue.Boss)
             name = "Boss";
         else if (value == (int) MZSymbolValue.SwitchOn)
-            name = "ON";
+            name = "On";
         else if (value == (int) MZSymbolValue.SwitchOff)
-            name = "OFF";
+            name = "Off";
         else if (value == (int) MZSymbolValue.Switch)
             name = "SW";
         else if (value >= 0 && value < 26)
@@ -67,13 +67,12 @@ public class MZSymbol : MonoBehaviour{
             name = value.ToString();
     }
     
-    //@Override
-    public bool Equals(Object other) {
+    public override bool Equals(object other) {
         if (other.GetType() == typeof(MZSymbol)) {
             return value == ((MZSymbol)other).value;
         } else {
             return true;
-            //return base.equals(other);
+            //return base.Equals(other);
         }
     }
     
@@ -83,13 +82,12 @@ public class MZSymbol : MonoBehaviour{
         return b.Equals(a);
     }
     
-    //@Override
-    public int HashCode() {
+    public override int GetHashCode() {
         return value;
     }
     
     /**
-     * @return the value of the Symbol
+     * @return the value of the MZSymbol
      */
     public int GetValue() {
         return value;
@@ -124,7 +122,7 @@ public class MZSymbol : MonoBehaviour{
     }
     
     /**
-     * @return whether the symbol is one of the special MZSymbolValue.Switch_{ON,OFF} symbols
+     * @return whether the symbol is one of the special MZSymbolValue.Switch_{On,Off} symbols
      */
     public bool IsSwitchState() {
         return value == (int) MZSymbolValue.SwitchOn || value == (int) MZSymbolValue.SwitchOff;

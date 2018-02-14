@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /**
- * Extends DungeonGenerator to choose the least nonlinear one immediately
+ * Extends MZDungeonGenerator to choose the least nonlinear one immediately
  * available. This saves the player from having to do a lot of backtracking.
  * 
  * Ignores switches for now.
  */
-public class LinearDungeonGenerator extends DungeonGenerator {
+public class LinearMZDungeonGenerator extends MZDungeonGenerator {
     
     public static final int MAX_ATTEMPTS = 10;
 
-    public LinearDungeonGenerator(ILogger logger, long seed,
-            MZIDungeonConstraints constraints) {
+    public LinearMZDungeonGenerator(ILogger logger, long seed,
+            IMZDungeonConstraints constraints) {
         super(logger, seed, constraints);
     }
     
-    public LinearDungeonGenerator(long seed, MZIDungeonConstraints constraints) {
+    public LinearMZDungeonGenerator(long seed, IMZDungeonConstraints constraints) {
         this(null, seed, constraints);
     }
     
-    private class AStarClient implements AStar.IClient<Integer> {
+    private class AStarClient implements AStar.IClient<int> {
         
         private int keyLevel;
         
@@ -30,30 +30,30 @@ public class LinearDungeonGenerator extends DungeonGenerator {
         }
 
         @Override
-        public Collection<Integer> getNeighbors(Integer roomId) {
-            List<Integer> ids = new ArrayList<Integer>();
-            for (Edge edge: dungeon.get(roomId).getEdges()) {
-                if (!edge.hasSymbol() || edge.getSymbol().getValue() < keyLevel) {
-                    ids.add(edge.getTargetRoomId());
+        public Collection<int> GetNeighbors(int roomId) {
+            List<int> ids = new ArrayList<int>();
+            for (MZEdge edge: dungeon.Get(roomId).GetEdges()) {
+                if (!edge.HasSymbol() || edge.GetSymbol().GetValue() < keyLevel) {
+                    ids.Add(edge.GetTargetRoomId());
                 }
             }
             return ids;
         }
 
         @Override
-        public Vec2I getVec2I(Integer roomId) {
-            return dungeon.get(roomId).getCenter();
+        public Vector2Int GetVector2Int(int roomId) {
+            return dungeon.Get(roomId).GetCenter();
         }
     }
     
-    private List<Integer> astar(int start, int goal, final int keyLevel) {
-        AStar<Integer> astar = new AStar<Integer>(new AStarClient(keyLevel), start, goal);
+    private List<int> astar(int start, int goal, final int keyLevel) {
+        AStar<int> astar = new AStar<int>(new AStarClient(keyLevel), start, goal);
         return astar.solve();
     }
     
     /**
      * Nonlinearity is measured as the number of rooms the player would have to
-     * pass through multiple times to get to the goal room (collecting keys and
+     * pass through multiple times to Get to the goal room (collecting keys and
      * unlocking doors along the way).
      * 
      * Uses A* to find a path from the entry to the first key, from each key to
@@ -62,15 +62,15 @@ public class LinearDungeonGenerator extends DungeonGenerator {
      * @return  The number of rooms passed through multiple times
      */
     public int measureNonlinearity() {
-        List<Room> keyRooms = new ArrayList<Room>(constraints.getMaxKeys());
-        for (int i = 0; i < constraints.getMaxKeys(); ++i) {
-            keyRooms.add(null);
+        List<Room> keyRooms = new ArrayList<Room>(constraints.GetMaxKeys());
+        for (int i = 0; i < constraints.GetMaxKeys(); ++i) {
+            keyRooms.Add(null);
         }
-        for (Room room: dungeon.getRooms()) {
-            if (room.getItem() == null) continue;
-            Symbol item = room.getItem();
-            if (item.getValue() >= 0 && item.getValue() < keyRooms.size())
-                keyRooms.set(item.getValue(), room);
+        for (Room room: dungeon.GetRooms()) {
+            if (room.GetItem() == null) continue;
+            MZSymbol item = room.GetItem();
+            if (item.GetValue() >= 0 && item.GetValue() < keyRooms.size())
+                keyRooms.Set(item.GetValue(), room);
         }
         // for N >= 0: keyRooms[N] = location of key N
         
@@ -82,37 +82,37 @@ public class LinearDungeonGenerator extends DungeonGenerator {
         assert current != null && goal != null;
         int nextKey = 0, nonlinearity = 0;
         
-        Set<Integer> visitedRooms = new TreeSet<Integer>();
+        Set<int> visitedRooms = new TreeSet<int>();
         while (current != goal) {
             Room intermediateGoal;
-            if (nextKey == constraints.getMaxKeys())
+            if (nextKey == constraints.GetMaxKeys())
                 intermediateGoal = goal;
             else
-                intermediateGoal = keyRooms.get(nextKey);
+                intermediateGoal = keyRooms.Get(nextKey);
             
-            List<Integer> steps = astar(current.id, intermediateGoal.id,
+            List<int> steps = astar(current.id, intermediateGoal.id,
                     nextKey);
-            for (Integer id: steps) {
+            for (int id: steps) {
                 if (visitedRooms.contains(id)) ++nonlinearity;
             }
             visitedRooms.addAll(steps);
             
             nextKey++;
-            current = dungeon.get(steps.get(steps.size()-1));
+            current = dungeon.Get(steps.Get(steps.size()-1));
         }
         return nonlinearity;
     }
 
     @Override
     public void Generate() {
-        int attempts = 0, currentNonlinearity = Integer.MAX_VALUE;
+        int attempts = 0, currentNonlinearity = Int32.MaxValue;
         int bestAttempt = 0;
-        Dungeon currentBest = null;
+        MZDungeon currentBest = null;
         while (attempts++ < MAX_ATTEMPTS) {
-            super.Generate();
+            base.Generate();
             
             int nonlinearity = measureNonlinearity();
-            log("Dungeon " + attempts + " nonlinearity: "+
+            log("MZDungeon " + attempts + " nonlinearity: "+
                     nonlinearity);
             if (nonlinearity < currentNonlinearity) {
                 currentNonlinearity = nonlinearity;

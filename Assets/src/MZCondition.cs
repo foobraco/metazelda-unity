@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -5,7 +6,7 @@ using UnityEngine;
 /**
  * Used to represent {@link Room}s' preconditions.
  * <p>
- * A Room's precondition can be considered the set of Symbols from the other
+ * A Room's precondition can be considered the set of MZSymbols from the other
  * Rooms that the player must have collected to be able to reach this room. For
  * instance, if the Room is behind a locked door, the precondition for the
  * Room includes the key for that lock.
@@ -14,269 +15,272 @@ using UnityEngine;
  * this can be implemented as a count of the number of keys the player must have
  * (the 'keyLevel').
  * <p>
- * The state of the {@link Dungeon}'s switch is also recorded in the Condition.
+ * The state of the {@link MZDungeon}'s switch is also recorded in the MZCondition.
  * A Room behind a link that requires the switch to be flipped into a particular
  * state will have a precondition that includes the switch's state.
  * <p>
- * A Condition is 'satisfied' when the player has all the keys it requires and
+ * A MZCondition is 'satisfied' when the player has all the keys it requires and
  * when the dungeon's switch is in the state that it requires.
  * <p>
- * A Condition x implies a Condition y if and only if y is satisfied whenever x
+ * A MZCondition x implies a MZCondition y if and only if y is satisfied whenever x
  * is.
  */
-public class Condition {
+public class MZCondition {
 
     /**
-     * A type to represent the required state of a switch for the Condition to
+     * A type to represent the required state of a switch for the MZCondition to
      * be satisfied.
      */
-    public static enum SwitchState {
+    public enum SwitchState
+    {
         /**
          * The switch may be in any state.
          */
-        EITHER,
+        Either,
         /**
          * The switch must be off.
          */
-        OFF,
+        Off,
         /**
          * The switch must be on.
          */
-        ON;
-        
-        /**
-         * Convert this SwitchState to a {@link Symbol}.
-         * 
-         * @return  a symbol representing the required state of the switch or
-         *          null if the switch may be in any state
-         */
-        public Symbol toSymbol() {
-            switch (this) {
-            case OFF:
-                return new Symbol(Symbol.SWITCH_OFF);
-            case ON:
-                return new Symbol(Symbol.SWITCH_ON);
-            default:
-                return null;
-            }
-        }
-        
-        /**
-         * Invert the required state of the switch.
-         * 
-         * @return  a SwitchState with the opposite required switch state or
-         *          this SwitchState if no particular state is required
-         */
-        public SwitchState invert() {
-            switch (this) {
-            case OFF: return ON;
-            case ON: return OFF;
-            default:
-                return this;
-            }
-        }
-    };
-    
+        On
+    }
+
     protected int keyLevel;
-    
     protected SwitchState switchState;
+    protected bool initialized = false;
 
     /**
-     * Create a Condition that is always satisfied.
+     * Create a MZCondition that is always satisfied.
      */
-    public Condition() {
+    public MZCondition() {
         keyLevel = 0;
-        switchState = SwitchState.EITHER;
+        switchState = SwitchState.Either;
     }
     
     /**
-     * Creates a Condition that requires the player to have a particular
-     * {@link Symbol}.
+     * Creates a MZCondition that requires the player to have a particular
+     * {@link MZSymbol}.
      * 
-     * @param e the symbol that the player must have for the Condition to be
+     * @param e the symbol that the player must have for the MZCondition to be
      *          satisfied
      */
-    public Condition(Symbol e) {
-        if (e.getValue() == Symbol.SWITCH_OFF) {
+    public MZCondition(MZSymbol e) {
+        if (e.GetValue() == (int) MZSymbol.MZSymbolValue.SwitchOff) {
             keyLevel = 0;
-            switchState = SwitchState.OFF;
-        } else if (e.getValue() == Symbol.SWITCH_ON) {
+            switchState = SwitchState.Off;
+        } else if (e.GetValue() == (int) MZSymbol.MZSymbolValue.SwitchOn) {
             keyLevel = 0;
-            switchState = SwitchState.ON;
+            switchState = SwitchState.On;
         } else {
-            keyLevel = e.getValue()+1;
-            switchState = SwitchState.EITHER;
+            keyLevel = e.GetValue()+1;
+            switchState = SwitchState.Either;
         }
     }
     
     /**
-     * Creates a Condition from another Condition (copy it).
+     * Creates a MZCondition from another MZCondition (copy it).
      * 
-     * @param other the other Condition
+     * @param other the other MZCondition
      */
-    public Condition(Condition other) {
+    public MZCondition(MZCondition other) {
         keyLevel = other.keyLevel;
         switchState = other.switchState;
     }
     
     /**
-     * Creates a Condition that requires the switch to be in a particular state.
+     * Creates a MZCondition that requires the switch to be in a particular state.
      * 
      * @param switchState   the required state for the switch to be in
      */
-    public Condition(SwitchState switchState) {
+    public MZCondition(SwitchState switchState) {
         keyLevel = 0;
         this.switchState = switchState;
     }
     
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Condition) {
-            Condition o = (Condition)other;
+    public override bool Equals(object other) {
+        if (other.GetType() == typeof(MZCondition)) {
+            MZCondition o = (MZCondition)other;
             return keyLevel == o.keyLevel && switchState == o.switchState;
         } else {
-            return super.equals(other);
+            return base.Equals(other);
         }
     }
     
-    private void add(Symbol sym) {
-        if (sym.getValue() == Symbol.SWITCH_OFF) {
-            assert switchState == null;
-            switchState = SwitchState.OFF;
-        } else if (sym.getValue() == Symbol.SWITCH_ON) {
-            assert switchState == null;
-            switchState = SwitchState.ON;
+    private void Add(MZSymbol sym) {
+        if (sym.GetValue() == (int) MZSymbol.MZSymbolValue.SwitchOff) {
+            switchState = SwitchState.Off;
+        } else if (sym.GetValue() == (int) MZSymbol.MZSymbolValue.SwitchOn) {
+            switchState = SwitchState.On;
         } else {
-            keyLevel = Math.max(keyLevel, sym.getValue()+1);
+            keyLevel = Math.Max(keyLevel, sym.GetValue()+1);
         }
     }
-    private void add(Condition cond) {
-        if (switchState == SwitchState.EITHER) {
+
+    private void Add(MZCondition cond) {
+        if (switchState == SwitchState.Either) {
             switchState = cond.switchState;
-        } else {
-            assert switchState == cond.switchState;
         }
-        keyLevel = Math.max(keyLevel, cond.keyLevel);
+        keyLevel = Math.Max(keyLevel, cond.keyLevel);
     }
     
     /**
-     * Creates a new Condition that requires this Condition to be satisfied and
-     * requires another {@link Symbol} to be obtained as well.
+     * Creates a new MZCondition that requires this MZCondition to be satisfied and
+     * requires another {@link MZSymbol} to be obtained as well.
      * 
-     * @param sym   the added symbol the player must have for the new Condition
+     * @param sym   the Added symbol the player must have for the new MZCondition
      *              to be satisfied
-     * @return      the new Condition
+     * @return      the new MZCondition
      */
-    public Condition and(Symbol sym) {
-        Condition result = new Condition(this);
-        result.add(sym);
+    public MZCondition And(MZSymbol sym) {
+        MZCondition result = new MZCondition(this);
+        result.Add(sym);
         return result;
     }
     
     /**
-     * Creates a new Condition that requires this Condition and another
-     * Condition to both be satisfied.
+     * Creates a new MZCondition that requires this MZCondition and another
+     * MZCondition to both be satisfied.
      * 
-     * @param other the other Condition that must be satisfied.
-     * @return      the new Condition
+     * @param other the other MZCondition that must be satisfied.
+     * @return      the new MZCondition
      */
-    public Condition and(Condition other) {
+    public MZCondition And(MZCondition other) {
         if (other == null) return this;
-        Condition result = new Condition(this);
-        result.add(other);
+        MZCondition result = new MZCondition(this);
+        result.Add(other);
         return result;
     }
     
     /**
-     * Determines whether another Condition is necessarily true if this one is.
+     * Determines whether another MZCondition is necessarily true if this one is.
      * 
-     * @param other the other Condition
-     * @return  whether the other Condition is implied by this one
+     * @param other the other MZCondition
+     * @return  whether the other MZCondition is implied by this one
      */
-    public boolean implies(Condition other) {
+    public bool Implies(MZCondition other) {
         return keyLevel >= other.keyLevel &&
                 (switchState == other.switchState ||
-                other.switchState == SwitchState.EITHER);
+                other.switchState == SwitchState.Either);
     }
+
     /**
-     * Determines whether this Condition implies that a particular
-     * {@link Symbol} has been obtained.
+     * Determines whether this MZCondition implies that a particular
+     * {@link MZSymbol} has been obtained.
      * 
-     * @param s the Symbol
-     * @return  whether the Symbol is implied by this Condition
+     * @param s the MZSymbol
+     * @return  whether the MZSymbol is implied by this MZCondition
      */
-    public boolean implies(Symbol s) {
-        return implies(new Condition(s));
+    public bool Implies(MZSymbol s) {
+        return Implies(new MZCondition(s));
     }
     
     /**
-     * Gets the single {@link Symbol} needed to make this Condition and another
-     * Condition identical.
+     * Gets the single {@link MZSymbol} needed to make this MZCondition and another
+     * MZCondition identical.
      * <p>
-     * If {@link #and}ed to both Conditions, the Conditions would then imply
+     * If {@link #and}ed to both MZConditions, the MZConditions would then imply
      * each other.
      * 
-     * @param other the other Condition
-     * @return  the Symbol needed to make the Conditions identical, or null if
-     *          there is no single Symbol that would make them identical or if
+     * @param other the other MZCondition
+     * @return  the MZSymbol needed to make the MZConditions identical, or null if
+     *          there is no single MZSymbol that would make them identical or if
      *          they are already identical.
      */
-    public Symbol singleSymbolDifference(Condition other) {
+    public MZSymbol SingleSymbolDifference(MZCondition other) {
         // If the difference between this and other can be made up by obtaining
         // a single new symbol, this returns the symbol. If multiple or no
         // symbols are required, returns null.
         
-        if (this.equals(other)) return null;
+        if (this.Equals(other)) return null;
         if (switchState == other.switchState) {
-            return new Symbol(Math.max(keyLevel, other.keyLevel)-1);
+            return new MZSymbol(Math.Max(keyLevel, other.keyLevel)-1);
         } else {
             if (keyLevel != other.keyLevel) return null;
             // Multiple symbols needed        ^^^
-            
-            assert switchState != other.switchState;
-            if (switchState != SwitchState.EITHER &&
-                    other.switchState != SwitchState.EITHER)
+
+            if (switchState != SwitchState.Either &&
+                    other.switchState != SwitchState.Either)
                 return null;
             
-            SwitchState nonEither = switchState != SwitchState.EITHER
+            SwitchState nonEither = switchState != SwitchState.Either
                     ? switchState
                     : other.switchState;
-            
-            return new Symbol(nonEither == SwitchState.ON
-                    ? Symbol.SWITCH_ON
-                    : Symbol.SWITCH_OFF);
+
+            return new MZSymbol(nonEither == SwitchState.On
+                    ? (int) MZSymbol.MZSymbolValue.SwitchOn
+                    : (int) MZSymbol.MZSymbolValue.SwitchOff);
         }
     }
     
-    @Override
-    public String toString() {
+    public override string ToString() {
         String result = "";
         if (keyLevel != 0) {
-            result += new Symbol(keyLevel-1).toString();
+            result += new MZSymbol(keyLevel-1).ToString();
         }
-        if (switchState != SwitchState.EITHER) {
-            if (!result.equals("")) result += ",";
-            result += switchState.toSymbol().toString();
+        if (switchState != SwitchState.Either) {
+            if (!result.Equals("")) result += ",";
+            result += switchState.ToSymbol().ToString();
         }
         return result;
     }
     
     /**
-     * Get the number of keys that need to have been obtained for this Condition
+     * Get the number of keys that need to have been obtained for this MZCondition
      * to be satisfied.
      * 
      * @return the number of keys
      */
-    public int getKeyLevel() {
+    public int GetKeyLevel() {
         return keyLevel;
     }
     
     /**
-     * Get the state the switch is required to be in for this Condition to be
+     * Get the state the switch is required to be in for this MZCondition to be
      * satisfied.
      */
-    public SwitchState getSwitchState() {
+    public SwitchState GetSwitchState() {
         return switchState;
     }
     
 }
+
+public static class Extensions
+{
+    /**
+     * Convert this SwitchState to a {@link MZSymbol}.
+     * 
+     * @return  a symbol representing the required state of the switch or
+     *          null if the switch may be in any state
+     */
+    public static MZSymbol ToSymbol(this MZCondition.SwitchState state)
+    {
+        switch (state)
+        {
+            case MZCondition.SwitchState.Off:
+                return new MZSymbol((int) MZSymbol.MZSymbolValue.SwitchOff);
+            case MZCondition.SwitchState.On:
+                return new MZSymbol((int) MZSymbol.MZSymbolValue.SwitchOn);
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Invert the required state of the switch.
+     * 
+     * @return  a SwitchState with the opposite required switch state or
+     *          this SwitchState if no particular state is required
+     */
+    public static MZCondition.SwitchState Invert(this MZCondition.SwitchState state)
+    {
+        switch (state)
+        {
+            case MZCondition.SwitchState.Off: return MZCondition.SwitchState.On;
+            case MZCondition.SwitchState.On: return MZCondition.SwitchState.Off;
+            default:
+                return state;
+        }
+    }
+};

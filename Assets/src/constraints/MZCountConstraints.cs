@@ -8,14 +8,14 @@ using UnityEngine;
  *
  * Also restrict to a grid of 1x1 rooms.
  *
- * @see MZIDungeonConstraints
+ * @see IMZDungeonConstraints
  */
-public class CountConstraints implements MZIDungeonConstraints {
+public class CountConstraints implements IMZDungeonConstraints {
 
     protected int maxSpaces, maxKeys, maxSwitches;
     
-    protected MZIntMap<Vec2I> gridCoords;
-    protected Vec2IMap<Integer> roomIds;
+    protected MZIntMap<Vector2Int> gridCoords;
+    protected Vector2IntMap<int> roomIds;
     protected int firstRoomId;
     
     public CountConstraints(int maxSpaces, int maxKeys, int maxSwitches) {
@@ -23,16 +23,16 @@ public class CountConstraints implements MZIDungeonConstraints {
         this.maxKeys = maxKeys;
         this.maxSwitches = maxSwitches;
 
-        gridCoords = new MZIntMap<Vec2I>();
-        roomIds = new Vec2IMap<Integer>();
-        Vec2I first = new Vec2I(0,0);
-        firstRoomId = getRoomId(first);
+        gridCoords = new MZIntMap<Vector2Int>();
+        roomIds = new Vector2IntMap<int>();
+        Vector2Int first = new Vector2Int(0,0);
+        firstRoomId = GetRoomId(first);
     }
     
-    public int getRoomId(Vec2I xy) {
+    public int GetRoomId(Vector2Int xy) {
         if (roomIds.containsKey(xy)) {
-            assert gridCoords.get(roomIds.get(xy)).equals(xy);
-            return roomIds.get(xy);
+            assert gridCoords.Get(roomIds.Get(xy)).Equals(xy);
+            return roomIds.Get(xy);
         } else {
             int id = gridCoords.newInt();
             gridCoords.put(id, xy);
@@ -41,13 +41,13 @@ public class CountConstraints implements MZIDungeonConstraints {
         }
     }
     
-    public Vec2I getRoomCoords(int id) {
+    public Vector2Int GetRoomCoords(int id) {
         assert gridCoords.containsKey(id);
-        return gridCoords.get(id);
+        return gridCoords.Get(id);
     }
     
     @Override
-    public int getMaxRooms() {
+    public int GetMaxRooms() {
         return maxSpaces;
     }
     
@@ -56,12 +56,12 @@ public class CountConstraints implements MZIDungeonConstraints {
     }
     
     @Override
-    public Collection<Integer> initialRooms() {
+    public Collection<int> initialRooms() {
         return Arrays.asList(firstRoomId);
     }
 
     @Override
-    public int getMaxKeys() {
+    public int GetMaxKeys() {
         return maxKeys;
     }
     
@@ -70,12 +70,12 @@ public class CountConstraints implements MZIDungeonConstraints {
     }
     
     @Override
-    public boolean isAcceptable(MZIDungeon dungeon) {
+    public bool isAcceptable(IMZDungeon dungeon) {
         return true;
     }
 
     @Override
-    public int getMaxSwitches() {
+    public int GetMaxSwitches() {
         return maxSwitches;
     }
 
@@ -83,25 +83,25 @@ public class CountConstraints implements MZIDungeonConstraints {
         this.maxSwitches = maxSwitches;
     }
 
-    protected boolean validRoomCoords(Vec2I c) {
+    protected bool validRoomCoords(Vector2Int c) {
         return c.y <= 0;
     }
     
     @Override
-    public List<Pair<Double,Integer>> getAdjacentRooms(int id, int keyLevel) {
-        Vec2I xy = gridCoords.get(id);
-        List<Pair<Double,Integer>> ids = new ArrayList<Pair<Double,Integer>>();
+    public List<Pair<Double,int>> GetAdjacentRooms(int id, int keyLevel) {
+        Vector2Int xy = gridCoords.Get(id);
+        List<Pair<Double,int>> ids = new ArrayList<Pair<Double,int>>();
         for (Direction d: Direction.CARDINALS) {
-            Vec2I neighbor = xy.add(d);
+            Vector2Int neighbor = xy.Add(d);
             if (validRoomCoords(neighbor))
-                ids.add(new Pair<Double,Integer>(1.0,getRoomId(neighbor)));
+                ids.Add(new Pair<Double,int>(1.0,getRoomId(neighbor)));
         }
         return ids;
     }
 
     @Override
-    public Set<Vec2I> getCoords(int id) {
-        return new Vec2ISet(Arrays.asList(getRoomCoords(id)));
+    public Set<Vector2Int> GetCoords(int id) {
+        return new Vector2IntSet(Arrays.asList(getRoomCoords(id)));
     }
 
     @Override
@@ -110,7 +110,7 @@ public class CountConstraints implements MZIDungeonConstraints {
     }
 
     @Override
-    public boolean roomCanFitItem(int id, Symbol key) {
+    public bool roomCanFitItem(int id, MZSymbol key) {
         return true;
     }
 
