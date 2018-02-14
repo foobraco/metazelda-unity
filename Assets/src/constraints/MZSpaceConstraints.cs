@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /**
- * Constrains the coordinates where Rooms may be placed to be only those within
+ * Constrains the coordinates where MZRooms may be placed to be only those within
  * the {@link SpaceMap}, as well as placing limitations on the number of keys
  * and switches.
  * 
@@ -18,7 +18,7 @@ public class SpaceConstraints extends CountConstraints {
     protected SpaceMap spaceMap;
     
     public SpaceConstraints(SpaceMap spaceMap) {
-        super(spaceMap.numberSpaces(), DEFAULT_MAX_KEYS, DEFAULT_MAX_SwitchES);
+        super(spaceMap.NumberSpaces(), DEFAULT_MAX_KEYS, DEFAULT_MAX_SwitchES);
         this.spaceMap = spaceMap;
     }
 
@@ -28,8 +28,8 @@ public class SpaceConstraints extends CountConstraints {
     }
 
     @Override
-    public Collection<int> initialRooms() {
-        List<int> ids = new ArrayList<int>();
+    public List<int> initialRooms() {
+        List<int> ids = new List<int>();
         for (Vector2Int xy: spaceMap.GetBottomSpaces()) {
             ids.Add(getRoomId(xy));
         }

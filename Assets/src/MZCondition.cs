@@ -4,19 +4,19 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /**
- * Used to represent {@link Room}s' preconditions.
+ * Used to represent {@link MZRoom}s' preconditions.
  * <p>
- * A Room's precondition can be considered the set of MZSymbols from the other
- * Rooms that the player must have collected to be able to reach this room. For
- * instance, if the Room is behind a locked door, the precondition for the
- * Room includes the key for that lock.
+ * A MZRoom's precondition can be considered the set of MZSymbols from the other
+ * MZRooms that the player must have collected to be able to reach this room. For
+ * instance, if the MZRoom is behind a locked door, the precondition for the
+ * MZRoom includes the key for that lock.
  * <p>
  * In practice, since there is always a time ordering on the collection of keys,
  * this can be implemented as a count of the number of keys the player must have
  * (the 'keyLevel').
  * <p>
  * The state of the {@link MZDungeon}'s switch is also recorded in the MZCondition.
- * A Room behind a link that requires the switch to be flipped into a particular
+ * A MZRoom behind a link that requires the switch to be flipped into a particular
  * state will have a precondition that includes the switch's state.
  * <p>
  * A MZCondition is 'satisfied' when the player has all the keys it requires and

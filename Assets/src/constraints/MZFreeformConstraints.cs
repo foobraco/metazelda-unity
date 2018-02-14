@@ -8,13 +8,13 @@ public class FreeformConstraints implements IMZDungeonConstraints {
     
     protected static class Group {
         public int id;
-        public Set<Vector2Int> coords;
-        public Set<int> adjacentGroups;
+        public List<Vector2Int> coords;
+        public List<int> adjacentGroups;
         
         public Group(int id) {
             this.id = id;
             this.coords = new Vector2IntSet();
-            this.adjacentGroups = new TreeSet<int>();
+            this.adjacentGroups = new TreeList<int>();
         }
     }
     
@@ -44,13 +44,13 @@ public class FreeformConstraints implements IMZDungeonConstraints {
                 }
                 group.coords.Add(new Vector2Int(x,y));
             }
-        System.out.println(groups.size() + " groups");
+        System.out.println(groups.Count + " groups");
         
         for (Group group: groups.values()) {
             for (Vector2Int xy: group.coords) {
                 for (Direction d: Direction.CARDINALS) {
                     Vector2Int neighbor = xy.Add(d);
-                    if (group.coords.contains(neighbor)) continue;
+                    if (group.coords.Contains(neighbor)) continue;
                     int val = colorMap.Get(neighbor.x, neighbor.y);
                     if (val != null && allowRoomsToBeAdjacent(group.id, val)) {
                         group.adjacentGroups.Add(val);
@@ -68,28 +68,28 @@ public class FreeformConstraints implements IMZDungeonConstraints {
         // full connected.
         // Do a breadth first search starting at the top left to check if
         // every position is reachable.
-        Set<int> world = new TreeSet<int>(groups.keySet()),
-                    queue = new TreeSet<int>();
+        List<int> world = new TreeList<int>(groups.keySet()),
+                    queue = new TreeList<int>();
         
         int first = world.iterator().next();
-        world.remove(first);
+        world.Remove(first);
         queue.Add(first);
         
         while (!queue.isEmpty()) {
             int pos = queue.iterator().next();
-            queue.remove(pos);
+            queue.Remove(pos);
             
             for (Pair<Double,int> adjacent: GetAdjacentRooms(pos, GetMaxKeys()+1)) {
                 int adjId = adjacent.second;
                 
-                if (world.contains(adjId)) {
-                    world.remove(adjId);
+                if (world.Contains(adjId)) {
+                    world.Remove(adjId);
                     queue.Add(adjId);
                 }
             }
         }
         
-        return world.size() == 0;
+        return world.Count == 0;
     }
     
     protected void CheckConnected() {
@@ -101,7 +101,7 @@ public class FreeformConstraints implements IMZDungeonConstraints {
     
     @Override
     public int GetMaxRooms() {
-        return groups.size();
+        return groups.Count;
     }
 
     @Override
@@ -119,8 +119,8 @@ public class FreeformConstraints implements IMZDungeonConstraints {
     }
 
     @Override
-    public Collection<int> initialRooms() {
-        Set<int> result = new TreeSet<int>();
+    public List<int> initialRooms() {
+        List<int> result = new TreeList<int>();
         
         // TODO place the initial room elsewhere?
         result.Add(groups.values().iterator().next().id);
@@ -130,7 +130,7 @@ public class FreeformConstraints implements IMZDungeonConstraints {
 
     @Override
     public List<Pair<Double,int>> GetAdjacentRooms(int id, int keyLevel) {
-        List<Pair<Double,int>> options = new ArrayList<Pair<Double,int>>();
+        List<Pair<Double,int>> options = new List<Pair<Double,int>>();
         for (int i: groups.Get(id).adjacentGroups) {
             options.Add(new Pair<Double,int>(1.0, i));
         }
@@ -148,7 +148,7 @@ public class FreeformConstraints implements IMZDungeonConstraints {
     }
     
     @Override
-    public Set<Vector2Int> GetCoords(int id) {
+    public List<Vector2Int> GetCoords(int id) {
         return Collections.unmodifiableSet(groups.Get(id).coords);
     }
 

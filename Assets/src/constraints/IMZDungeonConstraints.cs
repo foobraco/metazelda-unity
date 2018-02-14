@@ -11,7 +11,7 @@ using UnityEngine;
 public interface IMZDungeonConstraints {
 
     /**
-     * @return  the maximum number of Rooms an 
+     * @return  the maximum number of MZRooms an 
      * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
      *          place in an {@link net.bytten.metazelda.IMZDungeon}
      */
@@ -44,7 +44,7 @@ public interface IMZDungeonConstraints {
      * 
      * @return the collection of ids
      */
-    public Collection<int> initialRooms();
+    public List<int> initialRooms();
     
     /**
      * @return a weighted list of ids of rooms that are adjacent to the room

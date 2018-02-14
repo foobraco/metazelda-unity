@@ -5,44 +5,42 @@ using UnityEngine;
 /**
  * Controls which spaces are valid for an
  * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} to create
- * {@link Room}s in.
+ * {@link MZRoom}s in.
  * <p>
- * Essentially just a Set<{@link Vector2Int}> with some convenience methods.
+ * Essentially just a List<{@link Vector2Int}> with some convenience methods.
  *
  * @see Vector2Int
  * @see SpaceConstraints
  */
 public class SpaceMap {
-    protected Set<Vector2Int> spaces = new Vector2IntSet();
+    protected List<Vector2Int> spaces = new List<Vector2Int>();
     
-    public int numberSpaces() {
-        return spaces.size();
+    public int NumberSpaces() {
+        return spaces.Count;
     }
     
     public bool Get(Vector2Int c) {
-        return spaces.contains(c);
+        return spaces.Contains(c);
     }
     
     public void Set(Vector2Int c, bool val) {
         if (val)
             spaces.Add(c);
         else
-            spaces.remove(c);
+            spaces.Remove(c);
     }
     
     private Vector2Int GetFirst() {
-        return spaces.iterator().next();
+        return spaces[0];
     }
     
-    public Collection<Vector2Int> GetBottomSpaces() {
-        List<Vector2Int> bottomRow = new ArrayList<Vector2Int>();
-        bottomRow.Add(getFirst());
+    public List<Vector2Int> GetBottomSpaces() {
+        List<Vector2Int> bottomRow = new List<Vector2Int>{GetFirst()};
         int bottomY = GetFirst().y;
-        for (Vector2Int space: spaces) {
+        foreach (Vector2Int space in spaces) {
             if (space.y > bottomY) {
                 bottomY = space.y;
-                bottomRow = new ArrayList<Vector2Int>();
-                bottomRow.Add(space);
+                bottomRow = new List<Vector2Int> { space };
             } else if (space.y == bottomY) {
                 bottomRow.Add(space);
             }

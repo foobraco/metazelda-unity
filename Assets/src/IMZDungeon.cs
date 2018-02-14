@@ -4,13 +4,13 @@ using UnityEngine;
 
 /**
  * Represents the spacial layout of a lock-and-key puzzle and contains all
- * {@link MZSymbol}s, {@link Room}s and {@link MZEdge}s within the puzzle.
+ * {@link MZSymbol}s, {@link MZRoom}s and {@link MZEdge}s within the puzzle.
  */
 public interface IMZDungeon {
     /**
      * @return  the rooms within the dungeon
      */
-    Dictionary<int, Room>.ValueCollection GetRooms();
+    Dictionary<int, MZRoom>.ValueCollection GetRooms();
 
     /**
      * @return the number of rooms in the dungeon
@@ -21,7 +21,7 @@ public interface IMZDungeon {
      * @param id        the id of the room
      * @return  the room with the given id
      */
-    Room Get(int id);
+    MZRoom Get(int id);
 
     /**
      * Adds a new room to the dungeon, overwriting any rooms already in it that
@@ -29,7 +29,7 @@ public interface IMZDungeon {
      * 
      * @param room  the room to Add
      */
-    void Add(Room room);
+    void Add(MZRoom room);
 
     /**
      * Adds a one-way unconditional edge between the given rooms.
@@ -39,7 +39,8 @@ public interface IMZDungeon {
      * @param room1 the first room to link
      * @param room2 the second room to link
      */
-    public abstract void linkOneWay(Room room1, Room room2);
+    void LinkOneWay(MZRoom room1, MZRoom room2);
+
     /**
      * Adds a two-way unconditional edge between the given rooms.
      * A two-way edge may be used to travel from each room to the other.
@@ -47,7 +48,8 @@ public interface IMZDungeon {
      * @param room1 the first room to link
      * @param room2 the second room to link
      */
-    public abstract void link(Room room1, Room room2);
+    void Link(MZRoom room1, MZRoom room2);
+
     /**
      * Adds a one-way conditional edge between the given rooms.
      * A one-way edge may be used to travel from room1 to room2, but not room2
@@ -57,7 +59,7 @@ public interface IMZDungeon {
      * @param room2 the second room to link
      * @param cond  the condition on the edge
      */
-    public abstract void linkOneWay(Room room1, Room room2, MZSymbol cond);
+    void LinkOneWay(MZRoom room1, MZRoom room2, MZSymbol cond);
     /**
      * Adds a two-way conditional edge between the given rooms.
      * A two-way edge may be used to travel from each room to the other.
@@ -66,7 +68,7 @@ public interface IMZDungeon {
      * @param room2 the second room to link
      * @param cond  the condition on the edge
      */
-    public abstract void link(Room room1, Room room2, MZSymbol cond);
+    void Link(MZRoom room1, MZRoom room2, MZSymbol cond);
     /**
      * Tests whether two rooms are linked.
      * Two rooms are linked if there are any edges (in any direction) between
@@ -74,27 +76,27 @@ public interface IMZDungeon {
      * 
      * @return  true if the rooms are linked, false otherwise
      */
-    public abstract bool roomsAreLinked(Room room1, Room room2);
+    bool RoomsAreLinked(MZRoom room1, MZRoom room2);
     
     /**
      * @return  the room containing the START symbol
      */
-    public abstract Room findStart();
+    MZRoom FindStart();
     /**
      * @return  the room containing the BOSS symbol
      */
-    public abstract Room findBoss();
+    MZRoom FindBoss();
     /**
      * @return  the room containing the GOAL symbol
      */
-    public abstract Room findGoal();
+    MZRoom FindGoal();
     /**
      * @return  the room containing the Switch symbol
      */
-    public abstract Room findSwitch();
-    
+    MZRoom FindSwitch();
+
     /**
-     * Gets the {@link Rect2I} that encloses every room within the dungeon.
+     * Gets the {@link MZRect} that encloses every room within the dungeon.
      * <p>
      * The Bounds object has the X coordinate of the West-most room, the Y
      * coordinate of the North-most room, the 'right' coordinate of the
@@ -102,6 +104,5 @@ public interface IMZDungeon {
      * 
      * @return  the rectangle enclosing every room within the dungeon
      */
-    public abstract Rect2I GetExtentBounds();
-
+    MZRect GetExtentBounds();
 }

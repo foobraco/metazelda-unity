@@ -56,7 +56,7 @@ public class CountConstraints implements IMZDungeonConstraints {
     }
     
     @Override
-    public Collection<int> initialRooms() {
+    public List<int> initialRooms() {
         return Arrays.asList(firstRoomId);
     }
 
@@ -90,7 +90,7 @@ public class CountConstraints implements IMZDungeonConstraints {
     @Override
     public List<Pair<Double,int>> GetAdjacentRooms(int id, int keyLevel) {
         Vector2Int xy = gridCoords.Get(id);
-        List<Pair<Double,int>> ids = new ArrayList<Pair<Double,int>>();
+        List<Pair<Double,int>> ids = new List<Pair<Double,int>>();
         for (Direction d: Direction.CARDINALS) {
             Vector2Int neighbor = xy.Add(d);
             if (validRoomCoords(neighbor))
@@ -100,7 +100,7 @@ public class CountConstraints implements IMZDungeonConstraints {
     }
 
     @Override
-    public Set<Vector2Int> GetCoords(int id) {
+    public List<Vector2Int> GetCoords(int id) {
         return new Vector2IntSet(Arrays.asList(getRoomCoords(id)));
     }
 

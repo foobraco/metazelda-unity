@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,118 +9,103 @@ using UnityEngine;
  * Due to the fact it uses MZIntMap to store the rooms, it makes the assumption
  * that room ids are low in value, tight in range, and all positive.
  */
-public class MZDungeon implements IMZDungeon {
+public class MZDungeon : IMZDungeon {
 
     protected int itemCount;
-    protected MZIntMap<Room> rooms;
-    protected Rect2I bounds;
+    protected MZIntMap<MZRoom> rooms;
+    protected MZRect bounds;
     
     public MZDungeon() {
-        rooms = new MZIntMap<Room>();
-        bounds = Rect2I.fromExtremes(Int32.MaxValue,Int32.MaxValue,
+        rooms = new MZIntMap<MZRoom>();
+        bounds = new MZRect(Int32.MaxValue,Int32.MaxValue,
                 Int32.MinValue,Int32.MinValue);
     }
     
-    @Override
-    public Rect2I GetExtentBounds() {
+    public MZRect GetExtentBounds() {
         return bounds;
     }
     
-    @Override
-    public Collection<Room> GetRooms() {
-        return rooms.values();
+    public Dictionary<int, MZRoom>.ValueCollection GetRooms() {
+        return rooms.Values;
     }
     
-    @Override
-    public int roomCount() {
-        return rooms.size();
+    public int RoomCount() {
+        return rooms.Count;
     }
     
-    @Override
-    public Room Get(int id) {
-        return rooms.Get(id);
+    public MZRoom Get(int id) {
+        return rooms[id];
     }
     
-    @Override
-    public void Add(Room room) {
-        rooms.put(room.id, room);
+    public void Add(MZRoom room) {
+        rooms[room.id] = room;
         
-        for (Vector2Int xy: room.GetCoords()) {
-            if (xy.x < bounds.left()) {
-                bounds = Rect2I.fromExtremes(xy.x, bounds.top(),
-                        bounds.right(), bounds.bottom());
+        foreach (Vector2Int xy in room.GetCoords()) {
+            if (xy.x < bounds.Left) {
+                bounds = new MZRect(xy.x, bounds.Top,
+                        bounds.Right, bounds.Bottom);
             }
-            if (xy.x >= bounds.right()) {
-                bounds = Rect2I.fromExtremes(bounds.left(), bounds.top(),
-                        xy.x+1, bounds.bottom());
+            if (xy.x >= bounds.Right) {
+                bounds = new MZRect(bounds.Left, bounds.Top,
+                        xy.x+1, bounds.Bottom);
             }
-            if (xy.y < bounds.top()) {
-                bounds = Rect2I.fromExtremes(bounds.left(), xy.y,
-                        bounds.right(), bounds.bottom());
+            if (xy.y < bounds.Top) {
+                bounds = new MZRect(bounds.Left, xy.y,
+                        bounds.Right, bounds.Bottom);
             }
-            if (xy.y >= bounds.bottom()) {
-                bounds = Rect2I.fromExtremes(bounds.left(), bounds.top(),
-                        bounds.right(), xy.y+1);
+            if (xy.y >= bounds.Bottom) {
+                bounds = new MZRect(bounds.Left, bounds.Top,
+                        bounds.Right, xy.y+1);
             }
         }
     }
     
-    @Override
-    public void linkOneWay(Room room1, Room room2) {
-        linkOneWay(room1, room2, null);
+    public void LinkOneWay(MZRoom room1, MZRoom room2) {
+        LinkOneWay(room1, room2, null);
     }
     
-    @Override
-    public void link(Room room1, Room room2) {
-        link(room1, room2, null);
+    public void Link(MZRoom room1, MZRoom room2) {
+        Link(room1, room2, null);
     }
     
-    @Override
-    public void linkOneWay(Room room1, Room room2, MZSymbol cond) {
-        assert rooms.values().contains(room1) && rooms.values().contains(room2);
-        room1.setEdge(room2.id, cond);
+    public void LinkOneWay(MZRoom room1, MZRoom room2, MZSymbol cond) {
+        room1.SetEdge(room2.id, cond);
     }
     
-    @Override
-    public void link(Room room1, Room room2, MZSymbol cond) {
-        linkOneWay(room1, room2, cond);
-        linkOneWay(room2, room1, cond);
+    public void Link(MZRoom room1, MZRoom room2, MZSymbol cond) {
+        LinkOneWay(room1, room2, cond);
+        LinkOneWay(room2, room1, cond);
     }
     
-    @Override
-    public bool roomsAreLinked(Room room1, Room room2) {
+    public bool RoomsAreLinked(MZRoom room1, MZRoom room2) {
         return room1.GetEdge(room2.id) != null ||
             room2.GetEdge(room1.id) != null;
     }
     
-    @Override
-    public Room findStart() {
-        for (Room room: GetRooms()) {
-            if (room.isStart()) return room;
+    public MZRoom FindStart() {
+        foreach (MZRoom room in GetRooms()) {
+            if (room.IsStart()) return room;
         }
         return null;
     }
 
-    @Override
-    public Room findBoss() {
-        for (Room room: GetRooms()) {
-            if (room.isBoss()) return room;
+    public MZRoom FindBoss() {
+        foreach (MZRoom room in GetRooms()) {
+            if (room.IsBoss()) return room;
         }
         return null;
     }
 
-    @Override
-    public Room findGoal() {
-        for (Room room: GetRooms()) {
-            if (room.isGoal()) return room;
+    public MZRoom FindGoal() {
+        foreach (MZRoom room in GetRooms()) {
+            if (room.IsGoal()) return room;
         }
         return null;
     }
 
-    @Override
-    public Room findSwitch() {
-        for (Room room: GetRooms()) {
-            if (room.isSwitch()) return room;
+    public MZRoom FindSwitch() {
+        foreach (MZRoom room in GetRooms()) {
+            if (room.IsSwitch()) return room;
         }
         return null;
     }

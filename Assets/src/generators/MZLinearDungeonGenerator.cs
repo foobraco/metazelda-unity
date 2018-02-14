@@ -30,8 +30,8 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
         }
 
         @Override
-        public Collection<int> GetNeighbors(int roomId) {
-            List<int> ids = new ArrayList<int>();
+        public List<int> GetNeighbors(int roomId) {
+            List<int> ids = new List<int>();
             for (MZEdge edge: dungeon.Get(roomId).GetEdges()) {
                 if (!edge.HasSymbol() || edge.GetSymbol().GetValue() < keyLevel) {
                     ids.Add(edge.GetTargetRoomId());
@@ -62,29 +62,29 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
      * @return  The number of rooms passed through multiple times
      */
     public int measureNonlinearity() {
-        List<Room> keyRooms = new ArrayList<Room>(constraints.GetMaxKeys());
+        List<MZRoom> keyRooms = new List<MZRoom>(constraints.GetMaxKeys());
         for (int i = 0; i < constraints.GetMaxKeys(); ++i) {
             keyRooms.Add(null);
         }
-        for (Room room: dungeon.GetRooms()) {
+        foreach (MZRoom room in dungeon.GetRooms()) {
             if (room.GetItem() == null) continue;
             MZSymbol item = room.GetItem();
-            if (item.GetValue() >= 0 && item.GetValue() < keyRooms.size())
+            if (item.GetValue() >= 0 && item.GetValue() < keyRooms.Count)
                 keyRooms.Set(item.GetValue(), room);
         }
         // for N >= 0: keyRooms[N] = location of key N
         
-        Room current = dungeon.findStart(),
-                goal = dungeon.findGoal();
+        MZRoom current = dungeon.FindStart(),
+                goal = dungeon.FindGoal();
         // Clients may disable generation of the goal room -- the equivalent
         // 'ending' room becomes the boss room.
-        if (goal == null) goal = dungeon.findBoss();
+        if (goal == null) goal = dungeon.FindBoss();
         assert current != null && goal != null;
         int nextKey = 0, nonlinearity = 0;
         
-        Set<int> visitedRooms = new TreeSet<int>();
+        List<int> visitedRooms = new TreeList<int>();
         while (current != goal) {
-            Room intermediateGoal;
+            MZRoom intermediateGoal;
             if (nextKey == constraints.GetMaxKeys())
                 intermediateGoal = goal;
             else
@@ -93,12 +93,12 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
             List<int> steps = astar(current.id, intermediateGoal.id,
                     nextKey);
             for (int id: steps) {
-                if (visitedRooms.contains(id)) ++nonlinearity;
+                if (visitedRooms.Contains(id)) ++nonlinearity;
             }
             visitedRooms.addAll(steps);
             
             nextKey++;
-            current = dungeon.Get(steps.Get(steps.size()-1));
+            current = dungeon.Get(steps.Get(steps.Count-1));
         }
         return nonlinearity;
     }

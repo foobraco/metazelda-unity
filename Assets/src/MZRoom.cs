@@ -1,36 +1,35 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 /**
  * Represents an individual space within the dungeon.
  * <p>
- * A Room contains:
+ * A MZRoom contains:
  * <ul>
  * <li>an item ({@link MZSymbol}) that the player may (at his or her choice)
- *      collect by passing through this Room;
+ *      collect by passing through this MZRoom;
  * <li>an intensity, which is a measure of the relative difficulty of the room
  *      and ranges from 0.0 to 1.0;
- * <li>{@link MZEdge}s for each door to an adjacent Room.
+ * <li>{@link MZEdge}s for each door to an adjacent MZRoom.
  * </ul>
  */
-public class Room {
+public class MZRoom {
 
     protected MZCondition precond;
-    public final int id;
-    protected Set<Vector2Int> coords;
+    public readonly int id;
+    protected List<Vector2Int> coords;
     protected Vector2Int center;
     protected MZSymbol item;
-    protected List<Edge> edges;
+    protected List<MZEdge> edges;
     protected double intensity;
-    protected Room parent;
-    protected List<Room> children;
+    protected MZRoom parent;
+    protected List<MZRoom> children;
     
     /**
-     * Creates a Room at the given coordinates, with the given parent,
+     * Creates a MZRoom at the given coordinates, with the given parent,
      * containing a specific item, and having a certain pre-{@link MZCondition}.
      * <p>
-     * The parent of a room is the parent node of this Room in the initial
+     * The parent of a room is the parent node of this MZRoom in the initial
      * tree of the dungeon during
      * {@link net.bytten.metazelda.generators.MZDungeonGenerator#Generate()}, and
      * before
@@ -42,67 +41,65 @@ public class Room {
      * @param precond   the precondition of the room
      * @see MZCondition
      */
-    public Room(int id, Set<Vector2Int> coords, Room parent, MZSymbol item, MZCondition precond) {
+    public MZRoom(int id, List<Vector2Int> coords, MZRoom parent, MZSymbol item, MZCondition precond) {
         this.id = id;
         this.coords = coords;
         this.item = item;
-        this.edges = new ArrayList<Edge>();
+        this.edges = new List<MZEdge>();
         this.precond = precond;
         this.intensity = 0.0;
         this.parent = parent;
-        this.children = new ArrayList<Room>(3);
+        this.children = new List<MZRoom>(3);
         // all edges initially null
-        
         int x = 0, y = 0;
-        for (Vector2Int xy: coords) {
+        foreach (Vector2Int xy in coords)
+        {
             x += xy.x; y += xy.y;
         }
-        center = new Vector2Int(x/coords.size(), y/coords.size());
+        center = new Vector2Int(x / coords.Count, y / coords.Count);
     }
-    
-    public Room(int id, Vector2Int coords, Room parent, MZSymbol item, MZCondition precond) {
-        this(id, new Vector2IntSet(Arrays.asList(coords)), parent, item,
-                precond);
-    }
+
+    public MZRoom(int id, Vector2Int coords, MZRoom parent, MZSymbol item, MZCondition precond) :
+        this(id, new List<Vector2Int>{coords}, parent, item, precond) {}
     
     /**
-     * @return the intensity of the Room
-     * @see Room
+     * @return the intensity of the MZRoom
+     * @see MZRoom
      */
     public double GetIntensity() {
         return intensity;
     }
     
     /**
-     * @param intensity the value to set the Room's intensity to
-     * @see Room
+     * @param intensity the value to set the MZRoom's intensity to
+     * @see MZRoom
      */
-    public void setIntensity(double intensity) {
+    public void SetIntensity(double intensity) {
         this.intensity = intensity;
     }
 
     /**
-     * @return  the item contained in the Room, or null if there is none
+     * @return  the item contained in the MZRoom, or null if there is none
      */
     public MZSymbol GetItem() {
         return item;
     }
 
     /**
-     * @param item  the item to place in the Room
+     * @param item  the item to place in the MZRoom
      */
-    public void setItem(MZSymbol item) {
+    public void SetItem(MZSymbol item) {
         this.item = item;
     }
 
     /**
-     * Gets the array of {@link MZEdge} slots this Room has. There is one slot
+     * Gets the array of {@link MZEdge} slots this MZRoom has. There is one slot
      * for each compass {@link Direction}. Non-null slots in this array
-     * represent links between this Room and adjacent Rooms.
+     * represent links between this MZRoom and adjacent MZRooms.
      *
      * @return the array of MZEdges
      */
-    public List<Edge> GetEdges() {
+    public List<MZEdge> GetEdges() {
         return edges;
     }
     
@@ -110,22 +107,22 @@ public class Room {
      * Gets the MZEdge object for a link in a given direction.
      *
      * @param d the compass {@link Direction} of the MZEdge for the link from this
-     *          Room to an adjacent Room
+     *          MZRoom to an adjacent MZRoom
      * @return  the {@link MZEdge} for the link in the given direction, or null if
-     *          there is no link from this Room in the given direction
+     *          there is no link from this MZRoom in the given direction
      */
     public MZEdge GetEdge(int targetRoomId) {
-        for (MZEdge e: edges) {
+        foreach (MZEdge e in edges) {
             if (e.GetTargetRoomId() == targetRoomId)
                 return e;
         }
         return null;
     }
     
-    public MZEdge setEdge(int targetRoomId, MZSymbol symbol) {
+    public MZEdge SetEdge(int targetRoomId, MZSymbol symbol) {
         MZEdge e = GetEdge(targetRoomId);
         if (e != null) {
-            e.symbol = symbol;
+            e.Symbol = symbol;
         } else {
             e = new MZEdge(targetRoomId, symbol);
             edges.Add(e);
@@ -134,44 +131,44 @@ public class Room {
     }
     
     /**
-     * Gets the number of Rooms this Room is linked to.
+     * Gets the number of MZRooms this MZRoom is linked to.
      *
      * @return  the number of links
      */
-    public int linkCount() {
-        return edges.size();
+    public int LinkCount() {
+        return edges.Count;
     }
     
     /**
      * @return whether this room is the entry to the dungeon.
      */
-    public bool isStart() {
-        return item != null && item.isStart();
+    public bool IsStart() {
+        return item != null && item.IsStart();
     }
     
     /**
      * @return whether this room is the goal room of the dungeon.
      */
-    public bool isGoal() {
-        return item != null && item.isGoal();
+    public bool IsGoal() {
+        return item != null && item.IsGoal();
     }
     
     /**
      * @return whether this room contains the dungeon's boss.
      */
-    public bool isBoss() {
-        return item != null && item.isBoss();
+    public bool IsBoss() {
+        return item != null && item.IsBoss();
     }
     
     /**
      * @return whether this room contains the dungeon's switch object.
      */
-    public bool isSwitch() {
-        return item != null && item.isSwitch();
+    public bool IsSwitch() {
+        return item != null && item.IsSwitch();
     }
     
     /**
-     * @return the precondition for this Room
+     * @return the precondition for this MZRoom
      * @see MZCondition
      */
     public MZCondition GetPrecond() {
@@ -179,48 +176,48 @@ public class Room {
     }
     
     /**
-     * @param precond   the precondition to set this Room's to
+     * @param precond   the precondition to set this MZRoom's to
      * @see MZCondition
      */
-    public void setPrecond(MZCondition precond) {
+    public void SetPrecond(MZCondition precond) {
         this.precond = precond;
     }
 
     /**
-     * @return the parent of this Room
-     * @see Room#Room
+     * @return the parent of this MZRoom
+     * @see MZRoom#Room
      */
-    public Room GetParent() {
+    public MZRoom GetParent() {
         return parent;
     }
 
     /**
-     * @param parent the Room to set this Room's parent to
-     * @see Room#Room
+     * @param parent the MZRoom to set this MZRoom's parent to
+     * @see MZRoom#Room
      */
-    public void setParent(Room parent) {
+    public void SetParent(MZRoom parent) {
         this.parent = parent;
     }
     
     /**
-     * @return the collection of Rooms this Room is a parent of
-     * @see Room#Room
+     * @return the collection of MZRooms this MZRoom is a parent of
+     * @see MZRoom#Room
      */
-    public Collection<Room> GetChildren() {
+    public List<MZRoom> GetChildren() {
         return children;
     }
     
     /**
-     * Registers this Room as a parent of another.
+     * Registers this MZRoom as a parent of another.
      * Does not modify the child room's parent property.
      *
      * @param child the room to parent
      */
-    public void AddChild(Room child) {
+    public void AddChild(MZRoom child) {
         children.Add(child);
     }
     
-    public Set<Vector2Int> GetCoords() {
+    public List<Vector2Int> GetCoords() {
         return coords;
     }
     
@@ -228,8 +225,8 @@ public class Room {
         return center;
     }
     
-    public String toString() {
-        return "Room(" + coords.toString() + ")";
+    public override string ToString() {
+        return "Room(" + coords.ToString() + ")";
     }
     
 }
