@@ -61,7 +61,7 @@ public interface IMZDungeonConstraints {
     /**
      * @return a set of Coords which the room with the given id occupies.
      */
-    public Set<Vector2Int> GetCoords(int id);
+    public List<Vector2Int> GetCoords(int id);
     
     /**
      * Runs post-generation checks to determine the suitability of the dungeon.

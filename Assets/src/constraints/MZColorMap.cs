@@ -66,29 +66,31 @@ public class ColorMap {
 
         // Do a breadth first search starting at the top left to check if
         // every position is reachable.
-        Queue<Vector2Int> world = new Queue<Vector2Int>(map.Keys);
+        List<Vector2Int> world = new List<Vector2Int>(map.Keys);
         Queue<Vector2Int> queue = new Queue<Vector2Int>();
 
-        Vector2Int first = world.Dequeue();
+        Vector2Int first = world[0];
+        world.RemoveAt(0);
         queue.Enqueue(first);
+        Vector2Int[] directions = new Vector2Int[] { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
         
         while (queue.Count > 0) {
             Vector2Int pos = queue.Dequeue();
             
-            for (Direction d: Direction.CARDINALS) {
-                Vector2Int neighbor = pos.Add(d);
+            foreach (Vector2Int d in directions) {
+                Vector2Int neighbor = pos + d;
                 
-                if (world.contains(neighbor)) {
-                    world.remove(neighbor);
-                    queue.Add(neighbor);
+                if (world.Contains(neighbor)) {
+                    world.Remove(neighbor);
+                    queue.Enqueue(neighbor);
                 }
             }
         }
         
-        return world.size() == 0;
+        return world.Count == 0;
     }
     
-    public void checkConnected() {
+    public void CheckConnected() {
         if (!IsConnected()) {
             // Parts of the map are unreachable!
             throw new MZGenerationFailureException("ColorMap is not fully connected");

@@ -31,7 +31,7 @@ public class FreeformConstraints implements IMZDungeonConstraints {
     }
     
     protected void analyzeMap() {
-        colorMap.checkConnected();
+        colorMap.CheckConnected();
         
         for (int x = colorMap.GetLeft(); x <= colorMap.GetRight(); ++x)
             for (int y = colorMap.GetTop(); y <= colorMap.GetBottom(); ++y) {
@@ -59,11 +59,11 @@ public class FreeformConstraints implements IMZDungeonConstraints {
             }
         }
         
-        checkConnected();
+        CheckConnected();
     }
     
     protected bool IsConnected() {
-        // This is different from ColorMap.checkConnected because it also checks
+        // This is different from ColorMap.CheckConnected because it also checks
         // what the client says for allowRoomsToBeAdjacent allows the map to be
         // full connected.
         // Do a breadth first search starting at the top left to check if
@@ -92,7 +92,7 @@ public class FreeformConstraints implements IMZDungeonConstraints {
         return world.size() == 0;
     }
     
-    protected void checkConnected() {
+    protected void CheckConnected() {
         if (!IsConnected()) {
             // Parts of the map are unreachable!
             throw new MZGenerationFailureException("ColorMap is not fully connected");
