@@ -1,21 +1,22 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /**
- * Limits the {@link net.bytten.metazelda.generators.IMZDungeonGenerator} in
+ * Limits the {@link generators.IMZDungeonGenerator} in
  * the <i>number</i> of keys, switches and rooms it is allowed to place.
  *
  * Also restrict to a grid of 1x1 rooms.
  *
  * @see IMZDungeonConstraints
  */
-public class CountConstraints implements IMZDungeonConstraints {
+public class CountConstraints : IMZDungeonConstraints {
 
     protected int maxSpaces, maxKeys, maxSwitches;
     
     protected MZIntMap<Vector2Int> gridCoords;
-    protected Vector2IntMap<int> roomIds;
+    protected Dictionary<Vector2Int, int> roomIds;
     protected int firstRoomId;
     
     public CountConstraints(int maxSpaces, int maxKeys, int maxSwitches) {
@@ -24,93 +25,84 @@ public class CountConstraints implements IMZDungeonConstraints {
         this.maxSwitches = maxSwitches;
 
         gridCoords = new MZIntMap<Vector2Int>();
-        roomIds = new Vector2IntMap<int>();
+        roomIds = new Dictionary<Vector2Int, int>();
         Vector2Int first = new Vector2Int(0,0);
         firstRoomId = GetRoomId(first);
     }
     
     public int GetRoomId(Vector2Int xy) {
-        if (roomIds.containsKey(xy)) {
-            assert gridCoords.Get(roomIds.Get(xy)).Equals(xy);
-            return roomIds.Get(xy);
+        if (roomIds.ContainsKey(xy)) {
+            return roomIds[xy];
         } else {
-            int id = gridCoords.newInt();
-            gridCoords.put(id, xy);
-            roomIds.put(xy, id);
+            int id = gridCoords.NewInt();
+            gridCoords[id] = xy;
+            roomIds[xy] = id;
             return id;
         }
     }
     
     public Vector2Int GetRoomCoords(int id) {
-        assert gridCoords.containsKey(id);
-        return gridCoords.Get(id);
+        return gridCoords[id];
     }
     
-    @Override
     public int GetMaxRooms() {
         return maxSpaces;
     }
     
-    public void setMaxSpaces(int maxSpaces) {
+    public void SetMaxSpaces(int maxSpaces) {
         this.maxSpaces = maxSpaces;
     }
     
-    @Override
-    public List<int> initialRooms() {
-        return Arrays.asList(firstRoomId);
+    public virtual List<int> InitialRooms() {
+        return new List<int> { firstRoomId };
     }
 
-    @Override
     public int GetMaxKeys() {
         return maxKeys;
     }
     
-    public void setMaxKeys(int maxKeys) {
+    public void SetMaxKeys(int maxKeys) {
         this.maxKeys = maxKeys;
     }
     
-    @Override
-    public bool isAcceptable(IMZDungeon dungeon) {
+    public bool IsAcceptable(IMZDungeon dungeon) {
         return true;
     }
 
-    @Override
     public int GetMaxSwitches() {
         return maxSwitches;
     }
 
-    public void setMaxSwitches(int maxSwitches) {
+    public void SetMaxSwitches(int maxSwitches) {
         this.maxSwitches = maxSwitches;
     }
 
-    protected bool validRoomCoords(Vector2Int c) {
+    protected virtual bool ValidRoomCoords(Vector2Int c) {
         return c.y <= 0;
     }
     
-    @Override
-    public List<Pair<Double,int>> GetAdjacentRooms(int id, int keyLevel) {
-        Vector2Int xy = gridCoords.Get(id);
-        List<Pair<Double,int>> ids = new List<Pair<Double,int>>();
-        for (Direction d: Direction.CARDINALS) {
-            Vector2Int neighbor = xy.Add(d);
-            if (validRoomCoords(neighbor))
-                ids.Add(new Pair<Double,int>(1.0,getRoomId(neighbor)));
+    public List<KeyValuePair<Double, int>> GetAdjacentRooms(int id, int keyLevel) {
+        Vector2Int xy = gridCoords[id];
+        List<KeyValuePair<Double, int>> ids = new List<KeyValuePair<Double, int>>();
+        Vector2Int[] directions = new Vector2Int[] { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
+
+        foreach (Vector2Int d in directions) {
+            Vector2Int neighbor = xy + d;
+            if (ValidRoomCoords(neighbor))
+                ids.Add(new KeyValuePair<Double,int>(1.0,GetRoomId(neighbor)));
         }
         return ids;
     }
 
-    @Override
     public List<Vector2Int> GetCoords(int id) {
-        return new Vector2IntSet(Arrays.asList(getRoomCoords(id)));
+        return new List<Vector2Int> { GetRoomCoords(id) };
     }
 
-    @Override
-    public double edgeGraphifyProbability(int id, int nextId) {
+    public double EdgeGraphifyProbability(int id, int nextId) {
         return 0.2;
     }
 
-    @Override
-    public bool roomCanFitItem(int id, MZSymbol key) {
+    public bool RoomCanFitItem(int id, MZSymbol key) {
         return true;
     }
 

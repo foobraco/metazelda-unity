@@ -31,9 +31,9 @@ public class MZRoom {
      * <p>
      * The parent of a room is the parent node of this MZRoom in the initial
      * tree of the dungeon during
-     * {@link net.bytten.metazelda.generators.MZDungeonGenerator#Generate()}, and
+     * {@link generators.MZDungeonGenerator#Generate()}, and
      * before
-     * {@link net.bytten.metazelda.generators.MZDungeonGenerator#graphify()}.
+     * {@link generators.MZDungeonGenerator#graphify()}.
      *
      * @param coords    the coordinates of the new room
      * @param parent    the parent room or null if it is the root / entry room
@@ -111,20 +111,20 @@ public class MZRoom {
      * @return  the {@link MZEdge} for the link in the given direction, or null if
      *          there is no link from this MZRoom in the given direction
      */
-    public MZEdge GetEdge(int targetRoomId) {
+    public MZEdge GetEdge(int tarGetRoomId) {
         foreach (MZEdge e in edges) {
-            if (e.GetTargetRoomId() == targetRoomId)
+            if (e.GetTarGetRoomId() == tarGetRoomId)
                 return e;
         }
         return null;
     }
     
-    public MZEdge SetEdge(int targetRoomId, MZSymbol symbol) {
-        MZEdge e = GetEdge(targetRoomId);
+    public MZEdge SetEdge(int tarGetRoomId, MZSymbol symbol) {
+        MZEdge e = GetEdge(tarGetRoomId);
         if (e != null) {
             e.Symbol = symbol;
         } else {
-            e = new MZEdge(targetRoomId, symbol);
+            e = new MZEdge(tarGetRoomId, symbol);
             edges.Add(e);
         }
         return e;

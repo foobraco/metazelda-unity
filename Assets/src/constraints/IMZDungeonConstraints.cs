@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -6,72 +7,72 @@ using UnityEngine;
  * Implementing classes may specify constraints to be placed on MZDungeon
  * generation.
  * 
- * @see net.bytten.metazelda.generators.IMZDungeonGenerator
+ * @see generators.IMZDungeonGenerator
  */
 public interface IMZDungeonConstraints {
 
     /**
      * @return  the maximum number of MZRooms an 
-     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
-     *          place in an {@link net.bytten.metazelda.IMZDungeon}
+     * {@link generators.IMZDungeonGenerator} may
+     *          place in an {@link IMZDungeon}
      */
-    public int GetMaxRooms();
+    int GetMaxRooms();
     
     /**
      * @return  the maximum number of keys an 
-     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
-     *          place in an {@link net.bytten.metazelda.IMZDungeon}
+     * {@link generators.IMZDungeonGenerator} may
+     *          place in an {@link IMZDungeon}
      */
-    public int GetMaxKeys();
+    int GetMaxKeys();
 
     /**
      * Gets the number of switches the
-     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} is allowed to
-     * place in an {@link net.bytten.metazelda.IMZDungeon}.
+     * {@link generators.IMZDungeonGenerator} is allowed to
+     * place in an {@link IMZDungeon}.
      * Note only one switch is ever placed due to limitations of the current
      * algorithm.
      * 
      * @return  the maximum number of switches an
-     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} may
-     *          place in an {@link net.bytten.metazelda.IMZDungeon}
+     * {@link generators.IMZDungeonGenerator} may
+     *          place in an {@link IMZDungeon}
      */
-    public int GetMaxSwitches();
+    int GetMaxSwitches();
     
     /**
      * Gets the collection of ids from which an
-     * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} is allowed to
+     * {@link generators.IMZDungeonGenerator} is allowed to
      * pick the entrance room.
      * 
      * @return the collection of ids
      */
-    public List<int> initialRooms();
+    List<int> InitialRooms();
     
     /**
      * @return a weighted list of ids of rooms that are adjacent to the room
      * with the given id.
      */
-    public List<Pair<Double,int>> GetAdjacentRooms(int id, int keyLevel);
+    List<KeyValuePair<Double, int>> GetAdjacentRooms(int id, int keyLevel);
     
     /**
      * @return desired probability for an extra edge to be Added between the
      * given rooms during the graphify phase.
      */
-    public double edgeGraphifyProbability(int id, int nextId);
+    double EdgeGraphifyProbability(int id, int nextId);
     
     /**
      * @return a set of Coords which the room with the given id occupies.
      */
-    public List<Vector2Int> GetCoords(int id);
+    List<Vector2Int> GetCoords(int id);
     
     /**
      * Runs post-generation checks to determine the suitability of the dungeon.
      * 
-     * @param dungeon   the {@link net.bytten.metazelda.IMZDungeon} to check
+     * @param dungeon   the {@link IMZDungeon} to check
      * @return  true to keep the dungeon, or false to discard the dungeon and
      *          attempt generation again
      */
-    public bool isAcceptable(IMZDungeon dungeon);
+    bool IsAcceptable(IMZDungeon dungeon);
     
-    public bool roomCanFitItem(int id, MZSymbol key);
+    bool RoomCanFitItem(int id, MZSymbol key);
     
 }

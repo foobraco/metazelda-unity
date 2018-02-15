@@ -7,7 +7,7 @@ using UnityEngine;
  * available. This saves the player from having to do a lot of backtracking.
  * 
  * Ignores switches for now.
- */
+ *
 public class LinearMZDungeonGenerator extends MZDungeonGenerator {
     
     public static final int MAX_ATTEMPTS = 10;
@@ -34,7 +34,7 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
             List<int> ids = new List<int>();
             for (MZEdge edge: dungeon.Get(roomId).GetEdges()) {
                 if (!edge.HasSymbol() || edge.GetSymbol().GetValue() < keyLevel) {
-                    ids.Add(edge.GetTargetRoomId());
+                    ids.Add(edge.GetTarGetRoomId());
                 }
             }
             return ids;
@@ -60,7 +60,7 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
      * the next key and from the last key to the goal.
      * 
      * @return  The number of rooms passed through multiple times
-     */
+     *
     public int measureNonlinearity() {
         List<MZRoom> keyRooms = new List<MZRoom>(constraints.GetMaxKeys());
         for (int i = 0; i < constraints.GetMaxKeys(); ++i) {
@@ -82,7 +82,7 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
         assert current != null && goal != null;
         int nextKey = 0, nonlinearity = 0;
         
-        List<int> visitedRooms = new TreeList<int>();
+        List<int> visitedRooms = new List<int>();
         while (current != goal) {
             MZRoom intermediateGoal;
             if (nextKey == constraints.GetMaxKeys())
@@ -112,7 +112,7 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
             base.Generate();
             
             int nonlinearity = measureNonlinearity();
-            log("MZDungeon " + attempts + " nonlinearity: "+
+            if (debug) Debug.Log("MZDungeon " + attempts + " nonlinearity: "+
                     nonlinearity);
             if (nonlinearity < currentNonlinearity) {
                 currentNonlinearity = nonlinearity;
@@ -121,9 +121,10 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
             }
         }
         assert currentBest != null;
-        log("Chose " + bestAttempt + " nonlinearity: "+
+        if (debug) Debug.Log("Chose " + bestAttempt + " nonlinearity: "+
                 currentNonlinearity);
         dungeon = currentBest;
     }
 
 }
+    */

@@ -4,7 +4,7 @@ using UnityEngine;
 
 /**
  * Controls which spaces are valid for an
- * {@link net.bytten.metazelda.generators.IMZDungeonGenerator} to create
+ * {@link generators.IMZDungeonGenerator} to create
  * {@link MZRoom}s in.
  * <p>
  * Essentially just a List<{@link Vector2Int}> with some convenience methods.
@@ -12,7 +12,7 @@ using UnityEngine;
  * @see Vector2Int
  * @see SpaceConstraints
  */
-public class SpaceMap {
+public class MZSpaceMap {
     protected List<Vector2Int> spaces = new List<Vector2Int>();
     
     public int NumberSpaces() {

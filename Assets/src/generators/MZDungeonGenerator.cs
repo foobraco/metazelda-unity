@@ -1,18 +1,17 @@
 using System.Collections;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 /**
  * The default and reference implementation of an {@link IMZDungeonGenerator}.
  */
-public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
-
-    protected ILogger logger;
+public class MZDungeonGenerator : IMZDungeonGenerator {
     protected long seed;
-    protected Random random;
     protected MZDungeon dungeon;
     protected IMZDungeonConstraints constraints;
     protected int maxRetries = 20;
+    private bool debug = true;
 
     protected bool bossRoomLocked, GenerateGoal;
 
@@ -22,30 +21,18 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      *
      * @param seed          the random seed to use
      * @param constraints   the constraints to place on generation
-     * @see net.bytten.metazelda.constraints.IMZDungeonConstraints
+     * @see constraints.IMZDungeonConstraints
      */
-    public MZDungeonGenerator(ILogger logger, long seed,
-            IMZDungeonConstraints constraints) {
-        this.logger = logger;
-        log("MZDungeon seed: "+seed);
+    public MZDungeonGenerator(int seed, IMZDungeonConstraints constraints) {
+        if (debug) Debug.Log("MZDungeon seed: "+seed);
         this.seed = seed;
-        this.random = new Random(seed);
-        assert constraints != null;
+        UnityEngine.Random.InitState(seed);
         this.constraints = constraints;
 
         bossRoomLocked = GenerateGoal = true;
     }
 
-    public MZDungeonGenerator(long seed, IMZDungeonConstraints constraints) {
-        this(null, seed, constraints);
-    }
-
-    @Override
-    public void log(String msg) {
-        if (logger != null) logger.log(msg);
-    }
-
-    public void setMaxRetries(int maxRetries) {
+    public void SetMaxRetries(int maxRetries) {
         this.maxRetries = maxRetries;
     }
 
@@ -56,14 +43,14 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @param roomCollection    the collection of rooms to choose from
      * @return  the room that was chosen, or null if there are no rooms with
      *          adjacent empty spaces
-     */
-    protected MZRoom chooseRoomWithFreeEdge(List<MZRoom> roomCollection,
+     *
+    protected MZRoom ChooseRoomWithFreeEdge(List<MZRoom> roomCollection,
             int keyLevel) {
         List<MZRoom> rooms = new List<MZRoom>(roomCollection);
         Collections.shuffle(rooms, random);
         for (int i = 0; i < rooms.Count; ++i) {
             MZRoom room = rooms.Get(i);
-            for (Pair<Double,int> next:
+            for (KeyValuePair<Double,int> next:
                     constraints.GetAdjacentRooms(room.id, keyLevel)) {
                 if (dungeon.Get(next.second) == null) {
                     return room;
@@ -80,9 +67,9 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @param room  the room
      * @return  the Direction of the empty space chosen adjacent to the MZRoom or
      *          null if there are no adjacent empty spaces
-     */
+     *
     protected int chooseFreeEdge(MZRoom room, int keyLevel) {
-        List<Pair<Double,int>> neighbors = new List<Pair<Double,int>>(
+        List<KeyValuePair<Double, int>> neighbors = new List<KeyValuePair<Double, int>>(
                 constraints.GetAdjacentRooms(room.id, keyLevel));
         Collections.shuffle(neighbors, random);
         while (!neighbors.isEmpty()) {
@@ -104,21 +91,25 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * keyLevel 3, the player must have collected at least 3 keys.
      */
     protected class KeyLevelRoomMapping {
-        protected List<List<MZRoom>> map = new List<List<MZRoom>>(
-                constraints.GetMaxKeys());
+        protected List<List<MZRoom>> map;
 
-        List<MZRoom> GetRooms(int keyLevel) {
-            while (keyLevel >= map.Count) map.Add(null);
-            if (map.Get(keyLevel) == null)
-                map.Set(keyLevel, new List<MZRoom>());
-            return map.Get(keyLevel);
+        public KeyLevelRoomMapping(int maxKeys)
+        {
+            map  = new List<List<MZRoom>>(maxKeys);
         }
 
-        void AddRoom(int keyLevel, MZRoom room) {
+        public List<MZRoom> GetRooms(int keyLevel) {
+            while (keyLevel >= map.Count) map.Add(null);
+            if (map[keyLevel] == null)
+                map[keyLevel] = new List<MZRoom>();
+            return map[keyLevel];
+        }
+
+        public void AddRoom(int keyLevel, MZRoom room) {
             GetRooms(keyLevel).Add(room);
         }
 
-        int keyCount() {
+        public int KeyCount() {
             return map.Count;
         }
     }
@@ -127,10 +118,10 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * Thrown by several IMZDungeonGenerator methods that can fail.
      * Should be caught and handled in {@link #Generate}.
      */
-    protected static class RetryException extends Exception {
+    protected class RetryException : Exception {
     }
 
-    protected static class OutOfRoomsException extends Exception {
+    protected class OutOfRoomsException : Exception {
     }
 
     /**
@@ -139,7 +130,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * is best to place the next key.
      *
      * @see #placeKeys
-     */
+     *
     protected static final Comparator<MZRoom>
     EDGE_COUNT_COMPARATOR = new Comparator<MZRoom>() {
         @Override
@@ -162,19 +153,16 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @param levels    the keyLevel -> room-set mapping to update
      * @see KeyLevelRoomMapping
      */
-    protected void initEntranceRoom(KeyLevelRoomMapping levels)
-            throws RetryException {
+    protected void InitEntranceRoom(KeyLevelRoomMapping levels) {
         int id;
-        List<int> possibleEntries = new List<int>(
-                constraints.initialRooms());
-        assert possibleEntries.Count > 0;
-        id = possibleEntries.Get(random.nextInt(possibleEntries.Count));
+        List<int> possibleEntries = new List<int>(constraints.InitialRooms());
+        id = possibleEntries[UnityEngine.Random.Range(0, possibleEntries.Count)];
 
         MZRoom entry = new MZRoom(id, constraints.GetCoords(id), null,
-                new MZSymbol(MZSymbol.START), new MZCondition());
+                new MZSymbol((int) MZSymbol.MZSymbolValue.Start), new MZCondition());
         dungeon.Add(entry);
 
-        levels.addRoom(0, entry);
+        levels.AddRoom(0, entry);
     }
 
     /**
@@ -183,15 +171,15 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @param keyLevel the number of distinct locks that have been placed into
      *      the map so far
      * @param numRooms the number of rooms at the current keyLevel
-     * @param targetRoomsPerLock the number of rooms the generator has chosen
+     * @param tarGetRoomsPerLock the number of rooms the generator has chosen
      *      as the target number of rooms to place at each keyLevel (which
      *      subclasses can ignore, if desired).
-     */
-    protected bool shouldAddNewLock(int keyLevel, int numRooms, int targetRoomsPerLock) {
+     *
+    protected bool shouldAddNewLock(int keyLevel, int numRooms, int tarGetRoomsPerLock) {
         int usableKeys = constraints.GetMaxKeys();
         if (IsBossRoomLocked())
             usableKeys -= 1;
-        return numRooms >= targetRoomsPerLock && keyLevel < usableKeys;
+        return numRooms >= tarGetRoomsPerLock && keyLevel < usableKeys;
     }
 
     /**
@@ -199,12 +187,11 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * Keys are not inserted at this point.
      *
      * @param levels    the keyLevel -> room-set mapping to update
-     * @throws RetryException if it fails
+     * @ if it fails
      * @see KeyLevelRoomMapping
      */
-    protected void placeRooms(KeyLevelRoomMapping levels, int roomsPerLock)
-            throws RetryException, OutOfRoomsException {
-
+    protected void PlaceRooms(KeyLevelRoomMapping levels, int roomsPerLock) {
+        /*
         // keyLevel: the number of keys required to Get to the new room
         int keyLevel = 0;
         MZSymbol latestKey = null;
@@ -228,10 +215,10 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
             // Find an existing room with a free edge:
             MZRoom parentRoom = null;
             if (!doLock && random.nextInt(10) > 0)
-                parentRoom = chooseRoomWithFreeEdge(levels.GetRooms(keyLevel),
+                parentRoom = ChooseRoomWithFreeEdge(levels.GetRooms(keyLevel),
                         keyLevel);
             if (parentRoom == null) {
-                parentRoom = chooseRoomWithFreeEdge(dungeon.GetRooms(),
+                parentRoom = ChooseRoomWithFreeEdge(dungeon.GetRooms(),
                         keyLevel);
                 doLock = true;
             }
@@ -252,8 +239,9 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                 parentRoom.addChild(room);
                 dungeon.Link(parentRoom, room, doLock ? latestKey : null);
             }
-            levels.addRoom(keyLevel, room);
+            levels.AddRoom(keyLevel, room);
         }
+        */
     }
 
     /**
@@ -261,11 +249,11 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * These rooms are moved into the next keyLevel.
      *
      * @param levels    the keyLevel -> room-set mapping to update
-     * @throws RetryException if it fails
+     * @ if it fails
      * @see KeyLevelRoomMapping
-     */
+     *
     protected void placeBossGoalRooms(KeyLevelRoomMapping levels)
-            throws RetryException {
+             {
         List<MZRoom> possibleGoalRooms = new List<MZRoom>(dungeon.RoomCount());
 
         MZSymbol goalSym = new MZSymbol(MZSymbol.GOAL),
@@ -277,15 +265,15 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
             MZRoom parent = room.GetParent();
             if (parent == null)
                 continue;
-            if (isGenerateGoal() && (parent.GetChildren().Count != 1 ||
+            if (IsGenerateGoal() && (parent.GetChildren().Count != 1 ||
                     !parent.GetPrecond().Implies(room.GetPrecond())))
                 continue;
-            if (isGenerateGoal()) {
-                if (!constraints.roomCanFitItem(room.id, goalSym) ||
-                        !constraints.roomCanFitItem(parent.id, bossSym))
+            if (IsGenerateGoal()) {
+                if (!constraints.RoomCanFitItem(room.id, goalSym) ||
+                        !constraints.RoomCanFitItem(parent.id, bossSym))
                     continue;
             } else {
-                if (!constraints.roomCanFitItem(room.id, bossSym))
+                if (!constraints.RoomCanFitItem(room.id, bossSym))
                     continue;
             }
             possibleGoalRooms.Add(room);
@@ -297,7 +285,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                 possibleGoalRooms.Count)),
              bossRoom = goalRoom.GetParent();
 
-        if (!isGenerateGoal()) {
+        if (!IsGenerateGoal()) {
             bossRoom = goalRoom;
             goalRoom = null;
         }
@@ -306,15 +294,15 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
         bossRoom.SetItem(bossSym);
 
         int oldKeyLevel = bossRoom.GetPrecond().GetKeyLevel(),
-            newKeyLevel = Math.min(levels.keyCount(), constraints.GetMaxKeys());
+            newKeyLevel = Math.min(levels.KeyCount(), constraints.GetMaxKeys());
 
         if (oldKeyLevel != newKeyLevel) {
             List<MZRoom> oklRooms = levels.GetRooms(oldKeyLevel);
             if (goalRoom != null) oklRooms.Remove(goalRoom);
             oklRooms.Remove(bossRoom);
 
-            if (goalRoom != null) levels.addRoom(newKeyLevel, goalRoom);
-            levels.addRoom(newKeyLevel, bossRoom);
+            if (goalRoom != null) levels.AddRoom(newKeyLevel, goalRoom);
+            levels.AddRoom(newKeyLevel, bossRoom);
 
             MZSymbol bossKey = new MZSymbol(newKeyLevel-1);
             MZCondition precond = bossRoom.GetPrecond().And(bossKey);
@@ -336,7 +324,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      *
      * @param rooms the list of MZRooms to remove nodes from
      * @param room  the MZRoom whose descendants to remove from the list
-     */
+     *
     protected void removeDescendantsFromList(List<MZRoom> rooms, MZRoom room) {
         rooms.Remove(room);
         for (MZRoom child: room.GetChildren()) {
@@ -350,7 +338,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      *
      * @param room  the MZRoom to Add extra preconditions to
      * @param cond  the extra preconditions to Add
-     */
+     *
     protected void AddPrecond(MZRoom room, MZCondition cond) {
         room.SetPrecond(room.GetPrecond().And(cond));
         for (MZRoom child: room.GetChildren()) {
@@ -371,7 +359,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      *                      Added (which can happen due to the way the random
      *                      decisions are made)
      * @see MZCondition.SwitchState
-     */
+     *
     protected bool switchLockChildRooms(MZRoom room,
             MZCondition.SwitchState givenState) {
         bool anyLocks = false;
@@ -382,7 +370,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                     : MZCondition.SwitchState.Off);
 
         for (MZEdge edge: room.GetEdges()) {
-            int neighborId = edge.GetTargetRoomId();
+            int neighborId = edge.GetTarGetRoomId();
             MZRoom nextRoom = dungeon.Get(neighborId);
             if (room.GetChildren().Contains(nextRoom)) {
                 if (room.GetEdge(neighborId).GetSymbol() == null &&
@@ -408,7 +396,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      *
      * @return  a list of linked {@link MZRoom}s starting with the goal room and
      *          ending with the start room.
-     */
+     *
     protected List<MZRoom> GetSolutionPath() {
         List<MZRoom> solution = new List<MZRoom>();
         MZRoom room = dungeon.FindGoal();
@@ -424,9 +412,9 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * to be in a particular state, and places the switch in a room in the
      * dungeon.
      *
-     * @throws RetryException if it fails
-     */
-    protected void placeSwitches() throws RetryException {
+     * @ if it fails
+     *
+    protected void placeSwitches()  {
         // Possible TODO: have multiple switches on separate circuits
         // At the moment, we only have one switch per dungeon.
         if (constraints.GetMaxSwitches() <= 0) return;
@@ -459,7 +447,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
             foreach (MZRoom room in rooms) {
                 if (room.GetItem() == null &&
                         baseRoomCond.Implies(room.GetPrecond()) &&
-                        constraints.roomCanFitItem(room.id, switchSym)) {
+                        constraints.RoomCanFitItem(room.id, switchSym)) {
                     switchRoom = room;
                     break;
                 }
@@ -478,14 +466,14 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * Randomly links up some adjacent rooms to make the dungeon graph less of
      * a tree.
      *
-     * @throws RetryException if it fails
-     */
-    protected void graphify() throws RetryException {
+     * @ if it fails
+     *
+    protected void graphify()  {
         foreach (MZRoom room in dungeon.GetRooms()) {
 
             if (room.IsGoal() || room.IsBoss()) continue;
 
-            for (Pair<Double,int> next:
+            for (KeyValuePair<Double,int> next:
                     // Doesn't matter what the keyLevel is; later checks about
                     // preconds ensure linkage doesn't trivialize the puzzle.
                     constraints.GetAdjacentRooms(room.id, Int32.MaxValue)) {
@@ -501,7 +489,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                 if (forwardImplies && backwardImplies) {
                     // both rooms are at the same keyLevel.
                     if (random.nextDouble() >=
-                            constraints.edgeGraphifyProbability(room.id, nextRoom.id))
+                            constraints.EdgeGraphifyProbability(room.id, nextRoom.id))
                         continue;
 
                     dungeon.Link(room, nextRoom);
@@ -510,7 +498,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                             nextRoom.GetPrecond());
                     if (difference == null || (!difference.IsSwitchState() &&
                             random.nextDouble() >=
-                                constraints.edgeGraphifyProbability(room.id, nextRoom.id)))
+                                constraints.EdgeGraphifyProbability(room.id, nextRoom.id)))
                         continue;
                     dungeon.Link(room, nextRoom, difference);
                 }
@@ -523,14 +511,14 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * guaranteed to be solvable.
      *
      * @param levels    the keyLevel -> room-set mapping to use
-     * @throws RetryException if it fails
+     * @ if it fails
      * @see KeyLevelRoomMapping
-     */
-    protected void placeKeys(KeyLevelRoomMapping levels) throws RetryException {
+     *
+    protected void placeKeys(KeyLevelRoomMapping levels)  {
         // Now place the keys. For every key-level but the last one, place a
         // key for the next level in it, preferring rooms with fewest links
         // (dead end rooms).
-        for (int key = 0; key < levels.keyCount()-1; ++key) {
+        for (int key = 0; key < levels.KeyCount()-1; ++key) {
             List<MZRoom> rooms = levels.GetRooms(key);
 
             Collections.shuffle(rooms, random);
@@ -544,7 +532,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
 
             bool placedKey = false;
             foreach (MZRoom room in rooms) {
-                if (room.GetItem() == null && constraints.roomCanFitItem(room.id, keySym)) {
+                if (room.GetItem() == null && constraints.RoomCanFitItem(room.id, keySym)) {
                     room.SetItem(keySym);
                     placedKey = true;
                     break;
@@ -572,7 +560,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * @param intensity the value to set intensity to (some randomn variance is
      *                  Added)
      * @see MZRoom
-     */
+     *
     protected double applyIntensity(MZRoom room, double intensity) {
         intensity *= 1.0 - INTENSITY_GROWTH_JITTER/2.0 +
                 INTENSITY_GROWTH_JITTER * random.nextDouble();
@@ -595,7 +583,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * the range 0 <= intensity < 1.0.
      *
      * @see MZRoom
-     */
+     *
     protected void normalizeIntensity() {
         double maxIntensity = 0.0;
         foreach (MZRoom room in dungeon.GetRooms()) {
@@ -611,15 +599,15 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
      * intense the deeper they are into the dungeon.
      *
      * @param levels    the keyLevel -> room-set mapping to update
-     * @throws RetryException if it fails
+     * @ if it fails
      * @see KeyLevelRoomMapping
      * @see MZRoom
-     */
+     *
     protected void computeIntensity(KeyLevelRoomMapping levels)
-            throws RetryException {
+             {
 
         double nextLevelBaseIntensity = 0.0;
-        for (int level = 0; level < levels.keyCount(); ++level) {
+        for (int level = 0; level < levels.KeyCount(); ++level) {
 
             double intensity = nextLevelBaseIntensity *
                     (1.0 - INTENSITY_EASE_Off);
@@ -645,19 +633,19 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
 
     /**
      * Checks with the
-     * {@link net.bytten.metazelda.constraints.IMZDungeonConstraints} that the
+     * {@link constraints.IMZDungeonConstraints} that the
      * dungeon is OK to use.
      *
-     * @throws RetryException if the IMZDungeonConstraints decided generation must
+     * @ if the IMZDungeonConstraints decided generation must
      *                        be re-attempted
-     * @see net.bytten.metazelda.constraints.IMZDungeonConstraints
-     */
-    protected void checkAcceptable() throws RetryException {
-        if (!constraints.isAcceptable(dungeon))
+     * @see constraints.IMZDungeonConstraints
+     *
+    protected void checkAcceptable()  {
+        if (!constraints.IsAcceptable(dungeon))
             throw new RetryException();
     }
+    */
 
-    @Override
     public void Generate() {
         int attempt = 0;
 
@@ -671,20 +659,22 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                 } else {
                     roomsPerLock = constraints.GetMaxRooms();
                 }
-                while (true) {
+
+                bool keepTrying = true;
+                while (keepTrying) {
                     dungeon = new MZDungeon();
 
                     // Maps keyLevel -> MZRooms that were created when lockCount had that
                     // value
-                    levels = new KeyLevelRoomMapping();
+                    levels = new KeyLevelRoomMapping(constraints.GetMaxKeys());
 
                     // Create the entrance to the dungeon:
-                    initEntranceRoom(levels);
+                    InitEntranceRoom(levels);
 
                     try {
                         // Fill the dungeon with rooms:
-                        placeRooms(levels, roomsPerLock);
-                        break;
+                        PlaceRooms(levels, roomsPerLock);
+                        keepTrying = false;
                     } catch (OutOfRoomsException e) {
                         // We can run out of rooms where certain links have
                         // predetermined locks. Example: if a river bisects the
@@ -692,10 +682,10 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                         // crossing water requires a key. If there are not
                         // enough rooms before the river to build up to the
                         // key for the river, we've run out of rooms.
-                        log("Ran out of rooms. roomsPerLock was "+roomsPerLock);
+                        if (debug) Debug.Log("Ran out of rooms. roomsPerLock was "+roomsPerLock);
                         roomsPerLock = roomsPerLock * constraints.GetMaxKeys() /
                                 (constraints.GetMaxKeys() + 1);
-                        log("roomsPerLock is now "+roomsPerLock);
+                        if (debug) Debug.Log("roomsPerLock is now "+roomsPerLock);
 
                         if (roomsPerLock == 0) {
                             throw new MZGenerationFailureException(
@@ -708,6 +698,7 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                     }
                 }
 
+                /*
                 // Place the boss and goal rooms:
                 placeBossGoalRooms(levels);
 
@@ -719,27 +710,25 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
                 // Place the keys within the dungeon:
                 placeKeys(levels);
 
-                if (levels.keyCount()-1 != constraints.GetMaxKeys())
+                if (levels.KeyCount()-1 != constraints.GetMaxKeys())
                     throw new RetryException();
 
                 // Make the dungeon less tree-like:
                 graphify();
 
                 checkAcceptable();
-
+                */
                 return;
 
             } catch (RetryException e) {
                 if (++ attempt > maxRetries) {
                     throw new MZGenerationFailureException("MZDungeon generator failed", e);
                 }
-                log("Retrying dungeon generation...");
+                if (debug) Debug.Log("Retrying dungeon generation...");
             }
         }
-
     }
 
-    @Override
     public IMZDungeon GetMZDungeon() {
         return dungeon;
     }
@@ -748,16 +737,15 @@ public class MZDungeonGenerator implements IMZDungeonGenerator, ILogger {
         return bossRoomLocked;
     }
 
-    public void setBossRoomLocked(bool bossRoomLocked) {
+    public void SetBossRoomLocked(bool bossRoomLocked) {
         this.bossRoomLocked = bossRoomLocked;
     }
 
-    public bool isGenerateGoal() {
+    public bool IsGenerateGoal() {
         return GenerateGoal;
     }
 
-    public void setGenerateGoal(bool GenerateGoal) {
+    public void SetGenerateGoal(bool GenerateGoal) {
         this.GenerateGoal = GenerateGoal;
     }
-
 }

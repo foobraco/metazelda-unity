@@ -4,38 +4,32 @@ using UnityEngine;
 
 /**
  * Constrains the coordinates where MZRooms may be placed to be only those within
- * the {@link SpaceMap}, as well as placing limitations on the number of keys
+ * the {@link MZSpaceMap}, as well as placing limitations on the number of keys
  * and switches.
  * 
  * @see CountConstraints
- * @see SpaceMap
+ * @see MZSpaceMap
  */
-public class SpaceConstraints extends CountConstraints {
+public class SpaceConstraints : CountConstraints {
 
-    public static final int DEFAULT_MAX_KEYS = 4,
-            DEFAULT_MAX_SwitchES = 1;
+    public static readonly int DefaultMaxKeys = 4,
+            DefaultMaxSwitches = 1;
     
-    protected SpaceMap spaceMap;
+    protected MZSpaceMap spaceMap;
     
-    public SpaceConstraints(SpaceMap spaceMap) {
-        super(spaceMap.NumberSpaces(), DEFAULT_MAX_KEYS, DEFAULT_MAX_SwitchES);
+    public SpaceConstraints(MZSpaceMap spaceMap) : base(spaceMap.NumberSpaces(), DefaultMaxKeys, DefaultMaxSwitches) {
         this.spaceMap = spaceMap;
     }
 
-    @Override
-    protected bool validRoomCoords(Vector2Int c) {
+    protected override bool ValidRoomCoords(Vector2Int c) {
         return spaceMap.Get(c);
     }
 
-    @Override
-    public List<int> initialRooms() {
+    public override List<int> InitialRooms() {
         List<int> ids = new List<int>();
-        for (Vector2Int xy: spaceMap.GetBottomSpaces()) {
-            ids.Add(getRoomId(xy));
+        foreach (Vector2Int xy in spaceMap.GetBottomSpaces()) {
+            ids.Add(GetRoomId(xy));
         }
         return ids;
     }
-    
-    
-
 }
