@@ -55,7 +55,7 @@ public interface IMZDungeonConstraints {
     
     /**
      * @return desired probability for an extra edge to be Added between the
-     * given rooms during the graphify phase.
+     * given rooms during the Graphify phase.
      */
     double EdgeGraphifyProbability(int id, int nextId);
     

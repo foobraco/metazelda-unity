@@ -16,13 +16,13 @@ using UnityEngine;
  */
 public class MZEdge {
 
-    protected int tarGetRoomId;
+    protected int targetRoomId;
     public MZSymbol Symbol { get; set; }
    
     /**
      * Creates an unconditional MZEdge.
      */
-    public MZEdge(int tarGetRoomId) : this(tarGetRoomId, null) {}
+    public MZEdge(int targetRoomId) : this(targetRoomId, null) {}
     
     /**
      * Creates an MZEdge that requires a particular MZSymbol to be collected before
@@ -30,8 +30,8 @@ public class MZEdge {
      * 
      * @param symbol    the symbol that must be obtained
      */
-    public MZEdge(int tarGetRoomId, MZSymbol symbol) {
-        this.tarGetRoomId = tarGetRoomId;
+    public MZEdge(int targetRoomId, MZSymbol symbol) {
+        this.targetRoomId = targetRoomId;
         this.Symbol = symbol;
     }
     
@@ -54,15 +54,15 @@ public class MZEdge {
         this.Symbol = symbol;
     }
     
-    public int GetTarGetRoomId() {
-        return tarGetRoomId;
+    public int GetTargetRoomId() {
+        return targetRoomId;
     }
     
     public override bool Equals(object other) {
         if (other.GetType() == typeof(MZEdge))
         {
             MZEdge o = (MZEdge)other;
-            return tarGetRoomId == o.tarGetRoomId &&
+            return targetRoomId == o.targetRoomId &&
                     (Symbol == o.Symbol || Symbol.Equals(o.Symbol));
         } else {
             return base.Equals(other);

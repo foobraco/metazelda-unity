@@ -34,7 +34,7 @@ public class LinearMZDungeonGenerator extends MZDungeonGenerator {
             List<int> ids = new List<int>();
             for (MZEdge edge: dungeon.Get(roomId).GetEdges()) {
                 if (!edge.HasSymbol() || edge.GetSymbol().GetValue() < keyLevel) {
-                    ids.Add(edge.GetTarGetRoomId());
+                    ids.Add(edge.GetTargetRoomId());
                 }
             }
             return ids;

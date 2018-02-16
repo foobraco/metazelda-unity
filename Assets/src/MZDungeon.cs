@@ -34,7 +34,14 @@ public class MZDungeon : IMZDungeon {
     }
     
     public MZRoom Get(int id) {
-        return rooms[id];
+        if (rooms.ContainsKey(id))
+        {
+            return rooms[id];
+        }
+        else
+        {
+            return null;
+        }
     }
     
     public void Add(MZRoom room) {

@@ -33,7 +33,7 @@ public class MZRoom {
      * tree of the dungeon during
      * {@link generators.MZDungeonGenerator#Generate()}, and
      * before
-     * {@link generators.MZDungeonGenerator#graphify()}.
+     * {@link generators.MZDungeonGenerator#Graphify()}.
      *
      * @param coords    the coordinates of the new room
      * @param parent    the parent room or null if it is the root / entry room
@@ -111,20 +111,20 @@ public class MZRoom {
      * @return  the {@link MZEdge} for the link in the given direction, or null if
      *          there is no link from this MZRoom in the given direction
      */
-    public MZEdge GetEdge(int tarGetRoomId) {
+    public MZEdge GetEdge(int targetRoomId) {
         foreach (MZEdge e in edges) {
-            if (e.GetTarGetRoomId() == tarGetRoomId)
+            if (e.GetTargetRoomId() == targetRoomId)
                 return e;
         }
         return null;
     }
     
-    public MZEdge SetEdge(int tarGetRoomId, MZSymbol symbol) {
-        MZEdge e = GetEdge(tarGetRoomId);
+    public MZEdge SetEdge(int targetRoomId, MZSymbol symbol) {
+        MZEdge e = GetEdge(targetRoomId);
         if (e != null) {
             e.Symbol = symbol;
         } else {
-            e = new MZEdge(tarGetRoomId, symbol);
+            e = new MZEdge(targetRoomId, symbol);
             edges.Add(e);
         }
         return e;

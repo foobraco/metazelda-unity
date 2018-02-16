@@ -41,3 +41,9 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Doors
+    uniqueID: 704887727
+    locked: 0
+  - name: Keys
+    uniqueID: 1004301121
+    locked: 0
