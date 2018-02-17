@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 /**
  * If you just want to use the Metazelda library, this is the only file you need to modify / replace.
@@ -16,12 +17,36 @@ public class MZUnityBehaviourExample : MonoBehaviour {
     public GameObject lockedDoor;
     public GameObject blockedDoor;
     public GameObject key;
+    public GameObject roomSwitch;
+    public GameObject roomSwitchOn;
+    public GameObject roomSwitchOff;
+    public GameObject[] tileMapObjects;
+    private Tilemap tileMap;
 
     private readonly Color[] keyColors = { Color.blue, Color.yellow, Color.magenta, Color.cyan, Color.red, Color.green };
 
     void Start () {
         float roomRatio = 0.6875f; // 256x176
-        CountConstraints constraints = new CountConstraints(40, 3, 0);
+
+
+        // Use CountConstraints to make a truly random map.
+        //CountConstraints constraints = new CountConstraints(50, 3, 3);
+
+
+        // Use SpaceConstraints to make a map fitting to a shape.
+        MZSpaceMap spaceMap = new MZSpaceMap();
+        tileMap = tileMapObjects[Random.Range(0, tileMapObjects.Length)].GetComponentInChildren<Tilemap>();
+        foreach (Vector3Int posWithZ in tileMap.cellBounds.allPositionsWithin.GetEnumerator())
+        {
+            if (tileMap.HasTile(posWithZ))
+            {
+                Vector2Int pos = new Vector2Int(posWithZ.x, posWithZ.y);
+                spaceMap.Set(pos, true);
+            }
+        }
+        SpaceConstraints constraints = new SpaceConstraints(spaceMap);
+
+
         generator = new MZDungeonGenerator(Random.Range(0, int.MaxValue), constraints);
         generator.Generate();
         IMZDungeon dungeon = generator.GetMZDungeon();
@@ -56,7 +81,12 @@ public class MZUnityBehaviourExample : MonoBehaviour {
                 {
                     GameObject keyObjectInstance = Instantiate(key, new Vector3(room.GetCoords()[0].x, room.GetCoords()[0].y * roomRatio, 0), Quaternion.identity, transform);
                     keyObjectInstance.GetComponent<SpriteRenderer>().color = keyColors[item.GetValue()];
-                    keyObjectInstance.transform.localScale += new Vector3(1, 1, 1);
+                    keyObjectInstance.transform.localScale += new Vector3(2, 2, 2);
+                }
+                else if (item.GetValue() == (int) MZSymbol.MZSymbolValue.Switch)
+                {
+                    GameObject keyObjectInstance = Instantiate(roomSwitch, new Vector3(room.GetCoords()[0].x, room.GetCoords()[0].y * roomRatio, 0), Quaternion.identity, transform);
+                    keyObjectInstance.transform.localScale += new Vector3(2, 2, 2);
                 }
             }
 
@@ -76,9 +106,13 @@ public class MZUnityBehaviourExample : MonoBehaviour {
                     switch (edge.GetSymbol().GetValue())
                     {
                         case (int)MZSymbol.MZSymbolValue.SwitchOn:
+                            toInstantiate = blockedDoor;
+                            keyObject = roomSwitchOn;
+                            break;
+
                         case (int)MZSymbol.MZSymbolValue.SwitchOff:
                             toInstantiate = blockedDoor;
-                            // TODO: SwitchObject
+                            keyObject = roomSwitchOff;
                             break;
 
                         default:
@@ -101,8 +135,9 @@ public class MZUnityBehaviourExample : MonoBehaviour {
                     GameObject doorObject = Instantiate(toInstantiate, pos, Quaternion.identity, transform);
                     if (keyObject != null)
                     {
-                        GameObject keyObjectInstance = Instantiate(key, pos, Quaternion.identity, transform);
+                        GameObject keyObjectInstance = Instantiate(keyObject, pos, Quaternion.identity, transform);
                         keyObjectInstance.GetComponent<SpriteRenderer>().color = keyColor;
+                        keyObjectInstance.transform.localScale += new Vector3(1, 1, 1);
                     }
                 }
                 else if (edgeDir == Vector2Int.down)
@@ -114,8 +149,9 @@ public class MZUnityBehaviourExample : MonoBehaviour {
                     GameObject doorObject = Instantiate(toInstantiate, pos, rotation, transform);
                     if (keyObject != null)
                     {
-                        GameObject keyObjectInstance = Instantiate(key, pos, Quaternion.identity, transform);
+                        GameObject keyObjectInstance = Instantiate(keyObject, pos, Quaternion.identity, transform);
                         keyObjectInstance.GetComponent<SpriteRenderer>().color = keyColor;
+                        keyObjectInstance.transform.localScale += new Vector3(1, 1, 1);
                     }
                 }
             }

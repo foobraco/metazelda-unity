@@ -38,7 +38,7 @@ public class MZSpaceMap {
         List<Vector2Int> bottomRow = new List<Vector2Int>{GetFirst()};
         int bottomY = GetFirst().y;
         foreach (Vector2Int space in spaces) {
-            if (space.y > bottomY) {
+            if (space.y < bottomY) {
                 bottomY = space.y;
                 bottomRow = new List<Vector2Int> { space };
             } else if (space.y == bottomY) {

@@ -78,7 +78,7 @@ public class CountConstraints : IMZDungeonConstraints {
     }
 
     protected virtual bool ValidRoomCoords(Vector2Int c) {
-        return c.y <= 0;
+        return c.y >= 0;
     }
     
     public List<KeyValuePair<Double, int>> GetAdjacentRooms(int id, int keyLevel) {
