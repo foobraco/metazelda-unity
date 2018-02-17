@@ -24,7 +24,7 @@ public class MZDungeonGenerator : IMZDungeonGenerator {
      * @see constraints.IMZDungeonConstraints
      */
     public MZDungeonGenerator(int seed, IMZDungeonConstraints constraints) {
-        if (debug) Debug.Log("MZDungeon seed: "+seed);
+
         this.seed = seed;
         UnityEngine.Random.InitState(seed);
         this.constraints = constraints;
@@ -482,11 +482,19 @@ public class MZDungeonGenerator : IMZDungeonGenerator {
                     // preconds ensure linkage doesn't trivialize the puzzle.
                     constraints.GetAdjacentRooms(room.id, Int32.MaxValue)) {
                 int nextId = next.Value;
-                if (room.GetEdge(nextId) != null) continue;
+
+                if (room.GetEdge(nextId) != null)
+                    continue;
 
                 MZRoom nextRoom = dungeon.Get(nextId);
                 if (nextRoom == null || nextRoom.IsGoal() || nextRoom.IsBoss())
                     continue;
+
+                if (room.GetCoords()[0].x == -1 && room.GetCoords()[0].y == -3)
+                {
+                    //Debug.Log(nextRoom.GetCoords()[0].x + " " + nextRoom.GetCoords()[0].y);
+                    Debug.Log(room.GetEdges().Count);
+                }
 
                 bool forwardImplies = room.GetPrecond().Implies(nextRoom.GetPrecond()),
                         backwardImplies = nextRoom.GetPrecond().Implies(room.GetPrecond());
@@ -504,6 +512,7 @@ public class MZDungeonGenerator : IMZDungeonGenerator {
                             UnityEngine.Random.value >=
                                 constraints.EdgeGraphifyProbability(room.id, nextRoom.id)))
                         continue;
+
                     dungeon.Link(room, nextRoom, difference);
                 }
             }
